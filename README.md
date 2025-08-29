@@ -6,7 +6,7 @@ This project functions as a MIDI synthesizer, available both as a plugin and a s
 The source code was written with reference to the [juce-audio-plugin](https://github.com/anira-project/anira/tree/main/examples/juce-audio-plugin) included in the anira library.
 
 ## Demonstration
-[Youtube<img width="1392" height="832" alt="Screenshot 2025-08-30 at 1 06 53" src="https://github.com/user-attachments/assets/f4d89b10-30e1-41ae-93c7-260bfb7e437a" />](https://youtu.be/SheBqi23JsI?si=bAWdzOa2-LXQnk1T)
+[Youtube<img width="1017" height="653" alt="Screenshot 2025-08-30 at 1 12 39" src="https://github.com/user-attachments/assets/e77993cc-bd84-4883-be89-4f1152519369" />](https://youtu.be/SheBqi23JsI?si=bAWdzOa2-LXQnk1T)
 
 
 ## About Pre-trained model

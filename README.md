@@ -1,75 +1,47 @@
-#  A Template Audio Plugin for Real-time Neural Network Inference
+# RAVE_for_MIDISynthesiser
+Real-time MIDI-Synthesizer powered by the [RAVE](https://github.com/acids-ircam/RAVE) model and the [anira](https://github.com/anira-project/anira/tree/main) library. 
 
-> This repository was started as a companion repository to the talk **Real-time inference of neural networks: a practical approach for DSP engineers** at the Audio Developer Conference 2023. The video can be found [here](https://www.youtube.com/watch?v=z_RKgHU59r0).
+This project functions as a MIDI synthesizer, available both as a plugin and a standalone application. Specifically, a sine wave is used as the input to the RAVE model, and its frequency is controlled by MIDI notes.
 
-> Since the conference, we have continued to refine and extend the codebase. For more flexible and easier use of the inference architecture, we have consolidated this work into a library called [anira](https://github.com/tu-studio/anira), which is now used in this repository. For those interested in the state of the repository as presented at ADC23, it can be found under the tag [ADC23-talk](https://github.com/Torsion-Audio/nn-inference-template/tree/ADC23-talk).
+The source code was written with reference to the [juce-audio-plugin](https://github.com/anira-project/anira/tree/main/examples/juce-audio-plugin) included in the anira library.
 
-> Authors: **Valentin Ackva** & **Fares Schulz**
+## About Pre-trained model
+In creating this project, I trained three types of RAVE models (water sounds, violin, and alto saxophone).   
+You can download the models [here](https://www.dropbox.com/scl/fo/454ud8t5eulpj42d0ztmg/AB4ozeBlznhIaZ2UwxocFqg?rlkey=15en2vvl7gwtlahsg7lgmdnq5&st=350s3y2t&dl=0).  
 
-## Overview
+For each of these, two architectures (v1 and v2) were prepared. As expected, v2 has a larger size, which increases the likelihood of dropout occurring in the audio signal.  
+In Anira, the [InferenceConfig class](https://anira-project.github.io/anira/usage.html#inferenceconfig) allows you to specify the maximum inference time during initialization, making this adjustment particularly important.
 
-![mockup](assets/graphics/mockup.png)
+## About Training Data
+For training the above models, the following datasets were used:
+- [bpiyush/sound-of-water](https://huggingface.co/datasets/bpiyush/sound-of-water)
 
-![Build Status](https://github.com/Torsion-Audio/nn-inference-template/actions/workflows/build.yml/badge.svg)
+- [String Instruments Dataset](https://www.kaggle.com/datasets/aashnaashahh1504/string-instruments-dataset)
 
-This repository provides a comprehensive JUCE plugin template that demonstrates the use of [anira](https://github.com/tu-studio/anira) to implement neural network inference in real-time audio applications. In this template, we use all three inference engines currently supported by the library:
+- [Real Saxophone Recordings for Audio-to-Score Music Transcription](https://grfia.dlsi.ua.es/audio-to-score/)
 
-- TensorFlow Lite
-- LibTorch
-- ONNXRuntime.
+<!--## Demonstration-->
 
-[anira](https://github.com/tu-studio/anira), an architecture for neural network inference in real-time audio applications, covers all critical aspects of ensuring real-time safety and seamless signal flow for real-time inference. Detailed information can be found on the library's [github repo](https://github.com/tu-studio/anira).
 
-## Build instruction
-
-**Build with CMake**
-
-```bash
-# clone the repository
-git clone https://github.com/Torsion-Audio/nn-inference-template/
-cd nn-inference-template/
-
-# initialize and set up submodules
+## 🛠️ Build Instructions
+```
+cd RAVE_for_MIDISynthesiser
 git submodule update --init --recursive
-
-# use cmake to build debug
-cmake . -B cmake-build-debug -DCMAKE_BUILD_TYPE=Debug
-cmake --build cmake-build-debug --config Debug
-
-# use cmake to build release
-cmake . -B cmake-build-release -DCMAKE_BUILD_TYPE=Release
-cmake --build cmake-build-release --config Release
+cd build
+cmake ..
+cmake --build .
 ```
 
-To run the plugin or standalone application with the default model, you need to copy the model files to the correct location. The application will attempt to load the neural models from the user's application data directory at runtime. Therefore, you must copy the folder ```./modules/GuitarLSTM/*``` to the following locations, depending on your operating system:
+## Other References
+- [nn-inference-template](https://github.com/Torsion-Audio/nn-inference-template)
 
-Linux: ```~/.config/nn-inference-template/GuitarLSTM/*```
+- [RAVEv2_Training.ipynb](https://colab.research.google.com/drive/1ih-gv1iHEZNuGhHPvCHrleLNXvooQMvI?usp=sharing)
 
-macOS: ```~/Library/Application Support/nn-inference-template/GuitarLSTM/*```
+- [Tutorial: Build a MIDI synthesiser](https://juce.com/tutorials/tutorial_synth_using_midi_input/)
 
-Windows: ```%APPDATA%\nn-inference-template\GuitarLSTM\*```
+- [Let's build a synthesizer plug-in with C++ and the JUCE Framework!](https://youtube.com/playlist?list=PLLgJJsrdwhPwJimt5vtHtNmu63OucmPck&si=vfKCEvMZtt56co4B)
 
+## Planned Features
+- Allows you to select oscillators other than sine waves as input signals.
 
-## Install from release
-
-To install the plugin, please follow the instructions provided for your operating system:
-
-| [Linux](assets/docs/install_linux.md) | [macOS](assets/docs/install_mac.md) | [Windows](assets/docs/install_win.md) |
-|---|---|---|
-
-## Unit Test / Benchmark
-
-The previous unit test for benchmarking the plugin performance across different audio configurations and inference backends is replaced by the benchmarking options within [anira](https://github.com/tu-studio/anira). These new benchmarks have been improved in many ways and provide a range of simple to complex benchmarks that can be used to compare the inference time for different models, inference engines, and audio configurations.
-
-## Licenses
-
-The primary license for the code of this project is the MIT license, but be aware of the licenses of the submodules:
-
-
- - The *anira* library is licensed under the [Apache 2.0](https://github.com/tensorflow/tensorflow/blob/master/LICENSE)
- - The *GuitarLSTM* fork is licensed under the [GPLv3](https://github.com/GuitarML/GuitarLSTM/blob/main/LICENSE.txt)
- - The *JUCE* library is licensed under the [JUCE License](https://github.com/juce-framework/JUCE/blob/master/LICENSE.md)
- - The *ONNXRuntime* library is licensed under the [MIT](https://github.com/microsoft/onnxruntime/blob/main/LICENSE)
- - The *Libtorch* library is licensed under the [Modified BSD](https://github.com/pytorch/pytorch/blob/main/LICENSE)
- - The *TensorflowLite* library is licensed under the [Apache 2.0](https://github.com/tensorflow/tensorflow/blob/master/LICENSE)
- - All other code within this project is licensed under the MIT License.
+- Allows you to select RAVE models in a specific directory using a select box.

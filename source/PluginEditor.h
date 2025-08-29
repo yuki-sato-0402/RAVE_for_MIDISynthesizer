@@ -39,7 +39,7 @@ private:
   juce::Slider  ReleaseSlider;
   
   //juce::ComboBox modelComboBox;
-  juce::StringArray modelFileNames;
+  //juce::StringArray modelFileNames;
   
   juce::Label  MixLabel;
   juce::Label  GainLabel;

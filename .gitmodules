@@ -1,0 +1,6 @@
+[submodule "modules/JUCE"]
+	path = modules/JUCE
+	url = https://github.com/juce-framework/JUCE.git
+[submodule "modules/anira"]
+	path = modules/anira
+	url = https://github.com/anira-project/anira

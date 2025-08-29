@@ -51,5 +51,7 @@ cmake --build .
 
 ## Planned Features
 - Allows you to select oscillators other than sine waves as input signals.
+  
+- Instead of using an oscillator input style, it would be great to control the latent space directly via MIDI input.
 
 - Allows you to select RAVE models in a specific directory using a select box.

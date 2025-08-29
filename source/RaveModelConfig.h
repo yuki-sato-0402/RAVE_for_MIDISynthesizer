@@ -29,7 +29,7 @@
 
 static std::vector<anira::ModelData> modelData = {
 #ifdef USE_LIBTORCH
-    {RAVE_MODEL_DIR + std::string("/altoSaxV1_e02d7ebfe3_streaming.ts"), anira::InferenceBackend::LIBTORCH},
+    {RAVE_MODEL_DIR + std::string("/bpiyush_sound-of-waterV1_e02d7ebfe3_streaming.ts"), anira::InferenceBackend::LIBTORCH},
 #endif
 };
 
@@ -51,7 +51,7 @@ static anira::InferenceConfig rave_model_config(
     processingSpec,
     200.00f,
     5,//number of warm up inferences (There is a risk of a loud noise playing the moment the app launches.)
-    true // session_exclusive_processor because of cached convolution layers in the model
+    false // session_exclusive_processor because of cached convolution layers in the model
 );
 
 #endif //ANIRA_RAVE_model_CONFIG_H

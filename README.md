@@ -16,6 +16,10 @@ You can download the models [here](https://www.dropbox.com/scl/fo/454ud8t5eulpj4
 For each of these, two architectures (v1 and v2) were prepared. As expected, v2 has a larger size, which increases the likelihood of dropout occurring in the audio signal.  
 In Anira, the [InferenceConfig class](https://anira-project.github.io/anira/usage.html#inferenceconfig) allows you to specify the maximum inference time during initialization, making this adjustment particularly important.
 
+I compared the v1 and v2 models on my DAW (you can see this in the [Demonstration](https://github.com/yuki-sato-0402/RAVE_for_MIDISynthesiser#demonstration)), and the v2 model was quite unstable on my machine (MacBook Pro 2020 intel CPU).  
+I don't recommend using v2 at this time.  
+The v1 works without any issues.
+
 ## About Training Data
 For training the above models, the following datasets were used:
 - [bpiyush/sound-of-water](https://huggingface.co/datasets/bpiyush/sound-of-water)

@@ -1,4 +1,4 @@
-# RAVE_for_MIDISynthesiser
+# RAVE_for_MIDISynthesizer
 Real-time MIDI-Synthesizer powered by the [RAVE](https://github.com/acids-ircam/RAVE) model and the [anira](https://github.com/anira-project/anira/tree/main) library. 
 
 This project functions as a MIDI synthesizer, available both as a plugin and a standalone application. Specifically, a sine wave is used as the input to the RAVE model, and its frequency is controlled by MIDI notes.

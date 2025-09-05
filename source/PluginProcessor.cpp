@@ -28,8 +28,10 @@ RAVE_for_MIDISynthesiser_Processor::RAVE_for_MIDISynthesiser_Processor()
         //anira_context_config(
         //    std::thread::hardware_concurrency() / 2 > 0 ? std::thread::hardware_concurrency() / 2 : 1 // Total number of threads
         //),
-        pp_processor(inference_config),
-        inference_handler(pp_processor, inference_config),
+        pp_processor_encoder(inference_config_encoder),
+        pp_processor_decoder(inference_config_decoder),
+        inference_handler_encoder(pp_processor_encoder, inference_config_encoder),
+        inference_handler_decoder(pp_processor_decoder, inference_config_decoder),
         dry_wet_mixer(32768) // 32768 samples of max latency compensation for the dry-wet mixer
 {
     parameters.addParameterListener("dryWetRange", this);
@@ -126,16 +128,24 @@ void RAVE_for_MIDISynthesiser_Processor::prepareToPlay (double sampleRate, int s
                                  static_cast<juce::uint32>(getTotalNumInputChannels())};
     dry_wet_mixer.prepare(spec);
 
-    anira::HostConfig host_config {
+    anira::HostConfig host_config_encoder {
         static_cast<float>(samplesPerBlock),
         static_cast<float>(sampleRate),
         // true // Shall smaller buffers be allowed? If true more latency
     };
+    // The decoder needs to be prepared with the buffer size and sample rate of the latent space.
+    anira::HostConfig host_config_decoder {
+        static_cast<float>((float) samplesPerBlock / 2048.f),
+        static_cast<float>((float) sampleRate / 2048.f),
+        // true // Shall smaller buffers be allowed?
+    };
+    inference_handler_encoder.prepare(host_config_encoder);
+    inference_handler_decoder.prepare(host_config_decoder);
 
-    inference_handler.prepare(host_config);
-
-    int new_latency = (int) inference_handler.get_latency(); // The 0th tensor is the audio data tensor, so we only need the first element of the latency vector
-    
+    // Encoder latency must be multiplied by 2048, because the encoder compresses the audio data by a factor of 2048 in the time domain.
+    int new_latency_encoder = (int) inference_handler_encoder.get_latency() * 2048;
+    int new_latency_decoder = (int) inference_handler_decoder.get_latency();
+    int new_latency = new_latency_encoder + new_latency_decoder; // The total latency is the sum of the latencies of both encoders
 
     osc.prepare(spec);
     osc.setFrequency(440.0f);
@@ -204,7 +214,35 @@ void RAVE_for_MIDISynthesiser_Processor::processBlock (juce::AudioBuffer<float>&
     gain.process(juce::dsp::ProcessContextReplacing<float>(audioBlock));
 
     dry_wet_mixer.pushDrySamples(buffer);
-    inference_handler.process(buffer.getArrayOfWritePointers(), (size_t) buffer.getNumSamples());
+
+    // For the RAVE model, we need to process the encoder and decoder separately.
+    float latent_space[4][1];
+    float* latent_space_ptrs[4];
+    for (int i = 0; i < 4; ++i) {
+        latent_space_ptrs[i] = latent_space[i];
+    }
+    m_count_input_samples += buffer.getNumSamples();
+    inference_handler_encoder.push_data(buffer.getArrayOfWritePointers(), (size_t) buffer.getNumSamples());
+    // Only pop data from the encoder when we have enough samples needed for one time step in the latent space vector (2048 samples).
+    while (m_count_input_samples >= 2048) {
+        size_t received_samples = inference_handler_encoder.pop_data(latent_space_ptrs, 1);
+        if (received_samples == 0) {
+            std::cout << "No data received from encoder!" << std::endl;
+            break;
+        } else {
+            m_count_input_samples -= 2048;
+        }
+        // Make some latent space modulation :)
+        latent_space[0][0] += static_cast<float>(parameters.getParameterAsValue(PluginParameters::LATENT_0_ID.getParamID()).getValue());
+        latent_space[1][0] += static_cast<float>(parameters.getParameterAsValue(PluginParameters::LATENT_1_ID.getParamID()).getValue());
+        latent_space[2][0] += static_cast<float>(parameters.getParameterAsValue(PluginParameters::LATENT_2_ID.getParamID()).getValue());
+        latent_space[3][0] += static_cast<float>(parameters.getParameterAsValue(PluginParameters::LATENT_3_ID.getParamID()).getValue());
+
+        std::cout << "received_samples from encoder: " << received_samples << std::endl;
+        inference_handler_decoder.push_data(latent_space_ptrs, received_samples);
+    }
+    inference_handler_decoder.pop_data(buffer.getArrayOfWritePointers(), (size_t) buffer.getNumSamples());
+    
     dry_wet_mixer.mixWetSamples(buffer);
 
     if (isNonRealtime()) {

@@ -3,7 +3,8 @@
 #pragma once
 #include <JuceHeader.h>
 #include "PluginProcessor.h"
-#include "RaveModelConfig.h"
+#include "RaveModelConfigDecoder.h"
+#include "RaveModelConfigEncoder.h"
 
 /*
   ==============================================================================
@@ -23,6 +24,7 @@ public:
   void paint (juce::Graphics& g) override;
   void resized() override; 
   void sliderValueChanged(juce::Slider* slider) override;
+  void ADSRGraph(juce::Graphics& g);
   typedef juce::AudioProcessorValueTreeState::SliderAttachment SliderAttachment;
   typedef juce::AudioProcessorValueTreeState::ComboBoxAttachment ComboBoxAttachment;
 

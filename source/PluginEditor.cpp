@@ -159,35 +159,7 @@ RAVE_for_MIDISynthesiser_ProcessorEditor::RAVE_for_MIDISynthesiser_ProcessorEdit
 void RAVE_for_MIDISynthesiser_ProcessorEditor::paint (juce::Graphics& g)
 {
   g.fillAll(juce::Colours::greenyellow);
-
-  float attack  = static_cast<float>(AttackSlider.getValue()); 
-  float decay   = static_cast<float>(DecaySlider.getValue());
-  float sustain = static_cast<float>(SustainSlider.getValue());
-  float release = static_cast<float>(ReleaseSlider.getValue());
-
-  auto area = adsrGraphArea;
-
-  float totalTime = attack + decay + release;
-  if (totalTime < 1.0f) totalTime = 1.0f; 
-
-  int x0 = area.getX();
-  int x1 = x0 + static_cast<int>(area.getWidth() * attack / totalTime);
-  int x2 = x1 + static_cast<int>(area.getWidth() * decay / totalTime);
-  int x3 = area.getRight();
-
-  int y0 = area.getBottom();
-  int y1 = area.getY();
-  int y2 = area.getY() + static_cast<int>(area.getHeight() * (1.0f - sustain / 100.0f));
-  int y3 = area.getBottom();
-
-  juce::Path adsrPath;
-  adsrPath.startNewSubPath(x0, y0); // start point (0,0)
-  adsrPath.lineTo(x1, y1);          // Attack
-  adsrPath.lineTo(x2, y2);          // Decay→Sustain
-  adsrPath.lineTo(x3, y3);          // Release
-
-  g.setColour(juce::Colours::black);
-  g.strokePath(adsrPath, juce::PathStrokeType(2.0f));
+  ADSRGraph(g);
 }
 
 void RAVE_for_MIDISynthesiser_ProcessorEditor::resized()
@@ -236,4 +208,37 @@ void RAVE_for_MIDISynthesiser_ProcessorEditor::sliderValueChanged(juce::Slider* 
 {
     juce::ignoreUnused(slider);
     repaint();
+}
+
+void RAVE_for_MIDISynthesiser_ProcessorEditor::ADSRGraph(juce::Graphics& g)
+{
+  float attack  = static_cast<float>(AttackSlider.getValue()); 
+  float decay   = static_cast<float>(DecaySlider.getValue());
+  float sustain = static_cast<float>(SustainSlider.getValue());
+  float release = static_cast<float>(ReleaseSlider.getValue());
+
+  auto area = adsrGraphArea;
+
+  float totalTime = attack + decay + release;
+  if (totalTime < 1.0f) totalTime = 1.0f; 
+
+  int x0 = area.getX();
+  int x1 = x0 + static_cast<int>(area.getWidth() * attack / totalTime);
+  int x2 = x1 + static_cast<int>(area.getWidth() * decay / totalTime);
+  int x3 = area.getRight();
+
+  int y0 = area.getBottom();
+  int y1 = area.getY();
+  int y2 = area.getY() + static_cast<int>(area.getHeight() * (1.0f - sustain / 100.0f));
+  int y3 = area.getBottom();
+
+  juce::Path adsrPath;
+  adsrPath.startNewSubPath(x0, y0); // start point (0,0)
+  adsrPath.lineTo(x1, y1);          // Attack
+  adsrPath.lineTo(x2, y2);          // Decay→Sustain
+  adsrPath.lineTo(x3, y3);          // Release
+
+  g.setColour(juce::Colours::black);
+  g.strokePath(adsrPath, juce::PathStrokeType(2.0f));
+
 }

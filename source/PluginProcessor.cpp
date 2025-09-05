@@ -22,7 +22,23 @@ RAVE_for_MIDISynthesiser_Processor::RAVE_for_MIDISynthesiser_Processor()
         std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "sustain",  1}, "Sustain",
         juce::NormalisableRange<float>(0, 100, 1), 30),
         std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "releaseTime",  1}, "ReleaseTime",
-        juce::NormalisableRange<float>(1, 1000, 1), 200)      
+        juce::NormalisableRange<float>(1, 1000, 1), 200),
+        std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "latentVariable1",  1}, "latentVariable1",
+        juce::NormalisableRange<float>(-1.0f, 1.0f, 0.01f), 1.0f), 
+        std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "latentVariable2",  1}, "latentVariable2",
+        juce::NormalisableRange<float>(-1.0f, 1.0f, 0.01f), 1.0f), 
+        std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "latentVariable3",  1}, "latentVariable3",
+        juce::NormalisableRange<float>(-1.0f, 1.0f, 0.01f), 1.0f),
+        std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "latentVariable4",  1}, "latentVariable4",
+        juce::NormalisableRange<float>(-1.0f, 1.0f, 0.01f), 1.0f),
+        std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "latentVariable5",  1}, "latentVariable5",
+        juce::NormalisableRange<float>(-1.0f, 1.0f, 0.01f), 1.0f),
+        std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "latentVariable6",  1}, "latentVariable6",
+        juce::NormalisableRange<float>(-1.0f, 1.0f, 0.01f), 1.0f),
+        std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "latentVariable7",  1}, "latentVariable7",
+        juce::NormalisableRange<float>(-1.0f, 1.0f, 0.01f), 1.0f),
+        std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "latentVariable8",  1}, "latentVariable8",
+        juce::NormalisableRange<float>(-1.0f, 1.0f, 0.01f), 1.0f),    
         }
         ),
         //anira_context_config(
@@ -41,6 +57,14 @@ RAVE_for_MIDISynthesiser_Processor::RAVE_for_MIDISynthesiser_Processor()
     parameters.addParameterListener("decayTime", this);
     parameters.addParameterListener("sustain", this);
     parameters.addParameterListener("releaseTime", this);
+    parameters.addParameterListener("latentVariable1", this);
+    parameters.addParameterListener("latentVariable2", this);
+    parameters.addParameterListener("latentVariable3", this);
+    parameters.addParameterListener("latentVariable4", this);
+    parameters.addParameterListener("latentVariable5", this);
+    parameters.addParameterListener("latentVariable6", this);
+    parameters.addParameterListener("latentVariable7", this);
+    parameters.addParameterListener("latentVariable8", this);
 
     dryWetRangeParam = *parameters.getRawParameterValue("dryWetRange");
     gainParam = *parameters.getRawParameterValue("outputGain");
@@ -50,6 +74,14 @@ RAVE_for_MIDISynthesiser_Processor::RAVE_for_MIDISynthesiser_Processor()
     adsrParams.decay = *parameters.getRawParameterValue("decayTime") / 1000.0f;  
     adsrParams.sustain = *parameters.getRawParameterValue("sustain") / 100.0f;         
     adsrParams.release = *parameters.getRawParameterValue("releaseTime") / 1000.0f; 
+    latentVariable1Param = *parameters.getRawParameterValue("latentVariable1");
+    latentVariable2Param = *parameters.getRawParameterValue("latentVariable2");
+    latentVariable3Param = *parameters.getRawParameterValue("latentVariable3");
+    latentVariable4Param = *parameters.getRawParameterValue("latentVariable4");
+    latentVariable5Param = *parameters.getRawParameterValue("latentVariable5");
+    latentVariable6Param = *parameters.getRawParameterValue("latentVariable6");
+    latentVariable7Param = *parameters.getRawParameterValue("latentVariable7");
+    latentVariable8Param = *parameters.getRawParameterValue("latentVariable8");
 }
 
 
@@ -163,7 +195,8 @@ void RAVE_for_MIDISynthesiser_Processor::prepareToPlay (double sampleRate, int s
 
     #ifdef USE_LIBTORCH
         std::cout << "$Using LibTorch backend for inference.$" << std::endl;
-        inference_handler.set_inference_backend(anira::InferenceBackend::LIBTORCH);
+        inference_handler_encoder.set_inference_backend(anira::InferenceBackend::LIBTORCH);
+        inference_handler_decoder.set_inference_backend(anira::InferenceBackend::LIBTORCH);
     #endif
 }
 
@@ -216,9 +249,9 @@ void RAVE_for_MIDISynthesiser_Processor::processBlock (juce::AudioBuffer<float>&
     dry_wet_mixer.pushDrySamples(buffer);
 
     // For the RAVE model, we need to process the encoder and decoder separately.
-    float latent_space[4][1];
-    float* latent_space_ptrs[4];
-    for (int i = 0; i < 4; ++i) {
+    float latent_space[8][1];
+    float* latent_space_ptrs[8];
+    for (int i = 0; i < 8; ++i) {
         latent_space_ptrs[i] = latent_space[i];
     }
     m_count_input_samples += buffer.getNumSamples();
@@ -233,12 +266,21 @@ void RAVE_for_MIDISynthesiser_Processor::processBlock (juce::AudioBuffer<float>&
             m_count_input_samples -= 2048;
         }
         // Make some latent space modulation :)
-        latent_space[0][0] += static_cast<float>(parameters.getParameterAsValue(PluginParameters::LATENT_0_ID.getParamID()).getValue());
-        latent_space[1][0] += static_cast<float>(parameters.getParameterAsValue(PluginParameters::LATENT_1_ID.getParamID()).getValue());
-        latent_space[2][0] += static_cast<float>(parameters.getParameterAsValue(PluginParameters::LATENT_2_ID.getParamID()).getValue());
-        latent_space[3][0] += static_cast<float>(parameters.getParameterAsValue(PluginParameters::LATENT_3_ID.getParamID()).getValue());
+        latent_space[0][0] *= latentVariable1Param;
+        latent_space[1][0] *= latentVariable2Param;
+        latent_space[2][0] *= latentVariable3Param;
+        latent_space[3][0] *= latentVariable4Param;
+        latent_space[4][0] *= latentVariable5Param;
+        latent_space[5][0] *= latentVariable6Param;
+        latent_space[6][0] *= latentVariable7Param;
+        latent_space[7][0] *= latentVariable8Param;
+        //std::cout << "Latent space values: ";
+        //for (int i = 0; i < 8; ++i) {
+        //    std::cout << latent_space[i][0] << " ";
+        //}
+        //std::cout << std::endl;
 
-        std::cout << "received_samples from encoder: " << received_samples << std::endl;
+        
         inference_handler_decoder.push_data(latent_space_ptrs, received_samples);
     }
     inference_handler_decoder.pop_data(buffer.getArrayOfWritePointers(), (size_t) buffer.getNumSamples());
@@ -327,7 +369,39 @@ void RAVE_for_MIDISynthesiser_Processor::parameterChanged(const juce::String &pa
         adsrParams.release = newValue / 1000.0f; 
         adsr.setParameters(adsrParams);
         std::cout << "ReleaseTime changed to: " << newValue << " ms" << std::endl;
-    }       
+    }else if (parameterID == "latentVariable1") 
+    {
+        latentVariable1Param = newValue;
+        std::cout << "latentVariable1 changed to: " << newValue << std::endl;
+    }else if (parameterID == "latentVariable2") 
+    {
+        latentVariable2Param = newValue;
+        std::cout << "latentVariable2 changed to: " << newValue << std::endl;
+    }else if (parameterID == "latentVariable3") 
+    {
+        latentVariable3Param = newValue;
+        std::cout << "latentVariable3 changed to: " << newValue << std::endl;
+    }else if (parameterID == "latentVariable4") 
+    {
+        latentVariable4Param = newValue;
+        std::cout << "latentVariable4 changed to: " << newValue << std::endl;
+    }else if (parameterID == "latentVariable5") 
+    {
+        latentVariable5Param = newValue;
+        std::cout << "latentVariable5 changed to: " << newValue << std::endl;
+    }else if (parameterID == "latentVariable6") 
+    {
+        latentVariable6Param = newValue;
+        std::cout << "latentVariable6 changed to: " << newValue << std::endl;
+    }else if (parameterID == "latentVariable7") 
+    {
+        latentVariable7Param = newValue;
+        std::cout << "latentVariable7 changed to: " << newValue << std::endl;
+    }else if (parameterID == "latentVariable8") 
+    {
+        latentVariable8Param = newValue;
+        std::cout << "latentVariable8 changed to: " << newValue << std::endl;
+    }           
 }
 
 void RAVE_for_MIDISynthesiser_Processor::processesNonRealtime(const juce::AudioBuffer<float>& buffer) const {

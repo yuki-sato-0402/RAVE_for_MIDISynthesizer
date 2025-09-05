@@ -82,6 +82,15 @@ private:
     float gainParam;
     int modelIndex;
 
+    float latentVariable1Param = 0.0f;
+    float latentVariable2Param = 0.0f;
+    float latentVariable3Param = 0.0f;
+    float latentVariable4Param = 0.0f;
+    float latentVariable5Param = 0.0f;
+    float latentVariable6Param = 0.0f;
+    float latentVariable7Param = 0.0f;
+    float latentVariable8Param = 0.0f;
+
     double mutedSamples = 0;
     int64_t totalSamplesProcessed = 0;
 

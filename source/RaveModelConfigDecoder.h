@@ -5,7 +5,7 @@
 
 static std::vector<anira::ModelData> model_data_rave_model_decoder_config = {
 #ifdef USE_LIBTORCH
-    {RAVE_MODEL_DIR + std::string("/bpiyush_sound-of-waterV1_e02d7ebfe3_streaming.ts"), anira::InferenceBackend::LIBTORCH, std::string("decode")},
+    {RAVE_MODEL_DIR + std::string("altoSaxV1_e02d7ebfe3_streaming_norm.ts"), anira::InferenceBackend::LIBTORCH, std::string("decode")},
 #endif
 };
 

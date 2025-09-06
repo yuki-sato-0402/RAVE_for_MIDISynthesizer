@@ -19,7 +19,6 @@ RAVE_for_MIDISynthesiser_ProcessorEditor::RAVE_for_MIDISynthesiser_ProcessorEdit
   MixSlider.setTextValueSuffix (" %");     
   MixSlider.setTextBoxStyle (juce::Slider::TextBoxBelow, false, MixSlider.getTextBoxWidth(), MixSlider.getTextBoxHeight());
   addAndMakeVisible(MixSlider);
-  MixSlider.setColour(juce::Slider::textBoxTextColourId, juce::Colours::white);
   MixSlider.setColour(juce::Slider::rotarySliderOutlineColourId, juce::Colours::white);
   MixSlider.setColour(juce::Slider::rotarySliderFillColourId, juce::Colours::greenyellow.withAlpha(0.75f));
   MixSlider.setColour(juce::Slider::thumbColourId , juce::Colours::greenyellow.brighter(1.5));
@@ -36,7 +35,6 @@ RAVE_for_MIDISynthesiser_ProcessorEditor::RAVE_for_MIDISynthesiser_ProcessorEdit
   GainSlider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
   GainSlider.setTextBoxStyle (juce::Slider::TextBoxBelow, false, GainSlider.getTextBoxWidth(), GainSlider.getTextBoxHeight());
   addAndMakeVisible(GainSlider);
-  GainSlider.setColour(juce::Slider::textBoxTextColourId, juce::Colours::white);
   GainSlider.setColour(juce::Slider::rotarySliderOutlineColourId, juce::Colours::white);
   GainSlider.setColour(juce::Slider::rotarySliderFillColourId, juce::Colours::greenyellow.withAlpha(0.75f));
   GainSlider.setColour(juce::Slider::thumbColourId , juce::Colours::greenyellow.brighter(1.5));
@@ -83,7 +81,6 @@ RAVE_for_MIDISynthesiser_ProcessorEditor::RAVE_for_MIDISynthesiser_ProcessorEdit
   AttackSlider.setTextValueSuffix (" ms");     
   AttackSlider.setTextBoxStyle (juce::Slider::TextBoxBelow, false, AttackSlider.getTextBoxWidth(), AttackSlider.getTextBoxHeight());
   addAndMakeVisible(AttackSlider);
-  AttackSlider.setColour(juce::Slider::textBoxTextColourId, juce::Colours::white);
   AttackSlider.setColour(juce::Slider::rotarySliderOutlineColourId, juce::Colours::white);
   AttackSlider.setColour(juce::Slider::rotarySliderFillColourId, juce::Colours::greenyellow.withAlpha(0.75f));
   AttackSlider.setColour(juce::Slider::thumbColourId , juce::Colours::greenyellow.brighter(1.5));
@@ -101,7 +98,6 @@ RAVE_for_MIDISynthesiser_ProcessorEditor::RAVE_for_MIDISynthesiser_ProcessorEdit
   DecaySlider.setTextValueSuffix (" ms");     
   DecaySlider.setTextBoxStyle (juce::Slider::TextBoxBelow, false, DecaySlider.getTextBoxWidth(), DecaySlider.getTextBoxHeight());
   addAndMakeVisible(DecaySlider);
-  DecaySlider.setColour(juce::Slider::textBoxTextColourId, juce::Colours::white);
   DecaySlider.setColour(juce::Slider::rotarySliderOutlineColourId, juce::Colours::white);
   DecaySlider.setColour(juce::Slider::rotarySliderFillColourId, juce::Colours::greenyellow.withAlpha(0.75f));
   DecaySlider.setColour(juce::Slider::thumbColourId , juce::Colours::greenyellow.brighter(1.5));
@@ -119,7 +115,6 @@ RAVE_for_MIDISynthesiser_ProcessorEditor::RAVE_for_MIDISynthesiser_ProcessorEdit
   SustainSlider.setTextValueSuffix (" %");     
   SustainSlider.setTextBoxStyle (juce::Slider::TextBoxBelow, false, SustainSlider.getTextBoxWidth(), SustainSlider.getTextBoxHeight());
   addAndMakeVisible(SustainSlider);
-  SustainSlider.setColour(juce::Slider::textBoxTextColourId, juce::Colours::white);
   SustainSlider.setColour(juce::Slider::rotarySliderOutlineColourId, juce::Colours::white);
   SustainSlider.setColour(juce::Slider::rotarySliderFillColourId, juce::Colours::greenyellow.withAlpha(0.75f));
   SustainSlider.setColour(juce::Slider::thumbColourId , juce::Colours::greenyellow.brighter(1.5));
@@ -137,7 +132,6 @@ RAVE_for_MIDISynthesiser_ProcessorEditor::RAVE_for_MIDISynthesiser_ProcessorEdit
   ReleaseSlider.setTextValueSuffix (" ms");     
   ReleaseSlider.setTextBoxStyle (juce::Slider::TextBoxBelow, false, ReleaseSlider.getTextBoxWidth(), ReleaseSlider.getTextBoxHeight()); 
   addAndMakeVisible(ReleaseSlider);
-  ReleaseSlider.setColour(juce::Slider::textBoxTextColourId, juce::Colours::white);
   ReleaseSlider.setColour(juce::Slider::rotarySliderOutlineColourId, juce::Colours::white);
   ReleaseSlider.setColour(juce::Slider::rotarySliderFillColourId, juce::Colours::greenyellow.withAlpha(0.75f));
   ReleaseSlider.setColour(juce::Slider::thumbColourId , juce::Colours::greenyellow.brighter(1.5));
@@ -150,10 +144,154 @@ RAVE_for_MIDISynthesiser_ProcessorEditor::RAVE_for_MIDISynthesiser_ProcessorEdit
   ReleaseLabel.setColour(juce::Label::textColourId, juce::Colours::black);
   addAndMakeVisible(ReleaseLabel);
 
+  addAndMakeVisible(ScaleLabel);
+  ScaleLabel.setText ("Scale Factor", juce::dontSendNotification);
+  ScaleLabel.setJustificationType(juce::Justification::centred);
+  ScaleLabel.setColour(juce::Label::textColourId, juce::Colours::black);
+
+  addAndMakeVisible(latentVariable1Meter);
+  latentVariable1Meter.setColour(juce::Label::textColourId, juce::Colours::black);
+  latentVariable1Meter.setColour(juce::Label::backgroundColourId, juce::Colours::greenyellow);
+  addAndMakeVisible(latentVariable1Label);
+  latentVariable1Label.setText ("latentVariable 1", juce::dontSendNotification);
+  latentVariable1Label.setColour(juce::Label::textColourId, juce::Colours::black);
+
+  addAndMakeVisible(latentVariable1Slider);
+  latentVariable1SliderAttachment.reset (new SliderAttachment (valueTreeState, "latentVariable1", latentVariable1Slider));
+  latentVariable1Slider.setSliderStyle(juce::Slider::LinearHorizontal);
+  latentVariable1Slider.setTextBoxStyle (juce::Slider::TextBoxLeft, false, latentVariable1Slider.getTextBoxWidth(), latentVariable1Slider.getTextBoxHeight());  
+  latentVariable1Slider.setColour(juce::Slider::backgroundColourId, juce::Colours::white);
+  latentVariable1Slider.setColour(juce::Slider::trackColourId, juce::Colours::greenyellow.withAlpha(0.75f));
+  latentVariable1Slider.setColour(juce::Slider::thumbColourId , juce::Colours::greenyellow.brighter(1.5));
+  latentVariable1Slider.setColour(juce::Slider::textBoxTextColourId, juce::Colours::black);
+  latentVariable1Slider.setColour(juce::Slider::textBoxOutlineColourId , juce::Colours::greenyellow); 
+
+
+  addAndMakeVisible(latentVariable2Meter);
+  latentVariable2Meter.setColour(juce::Label::textColourId, juce::Colours::black);
+  latentVariable2Meter.setColour(juce::Label::backgroundColourId, juce::Colours::greenyellow);
+  addAndMakeVisible(latentVariable2Label);
+  latentVariable2Label.setText ("latentVariable 2", juce::dontSendNotification);
+  latentVariable2Label.setColour(juce::Label::textColourId, juce::Colours::black);
+
+  addAndMakeVisible(latentVariable2Slider);
+  latentVariable2SliderAttachment.reset (new SliderAttachment (valueTreeState, "latentVariable2", latentVariable2Slider));
+  latentVariable2Slider.setSliderStyle(juce::Slider::LinearHorizontal);
+  latentVariable2Slider.setTextBoxStyle (juce::Slider::TextBoxLeft, false, latentVariable2Slider.getTextBoxWidth(), latentVariable2Slider.getTextBoxHeight());  
+  latentVariable2Slider.setColour(juce::Slider::backgroundColourId, juce::Colours::white);
+  latentVariable2Slider.setColour(juce::Slider::trackColourId, juce::Colours::greenyellow.withAlpha(0.75f));
+  latentVariable2Slider.setColour(juce::Slider::thumbColourId , juce::Colours::greenyellow.brighter(1.5));
+  latentVariable2Slider.setColour(juce::Slider::textBoxTextColourId, juce::Colours::black);
+  latentVariable2Slider.setColour(juce::Slider::textBoxOutlineColourId , juce::Colours::greenyellow);
+
+  addAndMakeVisible(latentVariable3Meter);
+  latentVariable3Meter.setColour(juce::Label::textColourId, juce::Colours::black);
+  latentVariable3Meter.setColour(juce::Label::backgroundColourId, juce::Colours::greenyellow);
+  addAndMakeVisible(latentVariable3Label);
+  latentVariable3Label.setText ("latentVariable 3", juce::dontSendNotification);
+  latentVariable3Label.setColour(juce::Label::textColourId, juce::Colours::black);
+
+  addAndMakeVisible(latentVariable3Slider);
+  latentVariable3SliderAttachment.reset (new SliderAttachment (valueTreeState, "latentVariable3", latentVariable3Slider));
+  latentVariable3Slider.setSliderStyle(juce::Slider::LinearHorizontal);
+  latentVariable3Slider.setTextBoxStyle (juce::Slider::TextBoxLeft, false, latentVariable3Slider.getTextBoxWidth(), latentVariable3Slider.getTextBoxHeight());  
+  latentVariable3Slider.setColour(juce::Slider::backgroundColourId, juce::Colours::white);
+  latentVariable3Slider.setColour(juce::Slider::trackColourId, juce::Colours::greenyellow.withAlpha(0.75f));
+  latentVariable3Slider.setColour(juce::Slider::thumbColourId , juce::Colours::greenyellow.brighter(1.5));
+  latentVariable3Slider.setColour(juce::Slider::textBoxTextColourId, juce::Colours::black);
+  latentVariable3Slider.setColour(juce::Slider::textBoxOutlineColourId , juce::Colours::greenyellow);
+
+  addAndMakeVisible(latentVariable4Meter);
+  latentVariable4Meter.setColour(juce::Label::textColourId, juce::Colours::black);
+  latentVariable4Meter.setColour(juce::Label::backgroundColourId, juce::Colours::greenyellow);
+  addAndMakeVisible(latentVariable4Label);
+  latentVariable4Label.setText ("latentVariable 4", juce::dontSendNotification);
+  latentVariable4Label.setColour(juce::Label::textColourId, juce::Colours::black);
+
+  addAndMakeVisible(latentVariable4Slider);
+  latentVariable4SliderAttachment.reset (new SliderAttachment (valueTreeState, "latentVariable4", latentVariable4Slider));
+  latentVariable4Slider.setSliderStyle(juce::Slider::LinearHorizontal);
+  latentVariable4Slider.setTextBoxStyle (juce::Slider::TextBoxLeft, false, latentVariable4Slider.getTextBoxWidth(), latentVariable4Slider.getTextBoxHeight());  
+  latentVariable4Slider.setColour(juce::Slider::backgroundColourId, juce::Colours::white);
+  latentVariable4Slider.setColour(juce::Slider::trackColourId, juce::Colours::greenyellow.withAlpha(0.75f));
+  latentVariable4Slider.setColour(juce::Slider::thumbColourId , juce::Colours::greenyellow.brighter(1.5));
+  latentVariable4Slider.setColour(juce::Slider::textBoxTextColourId, juce::Colours::black);
+  latentVariable4Slider.setColour(juce::Slider::textBoxOutlineColourId , juce::Colours::greenyellow);
+
+  addAndMakeVisible(latentVariable5Meter);
+  latentVariable5Meter.setColour(juce::Label::textColourId, juce::Colours::black);
+  latentVariable5Meter.setColour(juce::Label::backgroundColourId, juce::Colours::greenyellow);
+  addAndMakeVisible(latentVariable5Label);
+  latentVariable5Label.setText ("latentVariable 5", juce::dontSendNotification);
+  latentVariable5Label.setColour(juce::Label::textColourId, juce::Colours::black);
+
+  addAndMakeVisible(latentVariable5Slider);
+  latentVariable5SliderAttachment.reset (new SliderAttachment (valueTreeState, "latentVariable5", latentVariable5Slider));
+  latentVariable5Slider.setSliderStyle(juce::Slider::LinearHorizontal);
+  latentVariable5Slider.setTextBoxStyle (juce::Slider::TextBoxLeft, false, latentVariable5Slider.getTextBoxWidth(), latentVariable5Slider.getTextBoxHeight());  
+  latentVariable5Slider.setColour(juce::Slider::backgroundColourId, juce::Colours::white);
+  latentVariable5Slider.setColour(juce::Slider::trackColourId, juce::Colours::greenyellow.withAlpha(0.75f));
+  latentVariable5Slider.setColour(juce::Slider::thumbColourId , juce::Colours::greenyellow.brighter(1.5));
+  latentVariable5Slider.setColour(juce::Slider::textBoxTextColourId, juce::Colours::black);
+  latentVariable5Slider.setColour(juce::Slider::textBoxOutlineColourId , juce::Colours::greenyellow); 
+
+  addAndMakeVisible(latentVariable6Meter);
+  latentVariable6Meter.setColour(juce::Label::textColourId, juce::Colours::black);
+  latentVariable6Meter.setColour(juce::Label::backgroundColourId, juce::Colours::greenyellow);  
+  addAndMakeVisible(latentVariable6Label);
+  latentVariable6Label.setText ("latentVariable 6", juce::dontSendNotification);
+  latentVariable6Label.setColour(juce::Label::textColourId, juce::Colours::black);
+
+  addAndMakeVisible(latentVariable6Slider);
+  latentVariable6SliderAttachment.reset (new SliderAttachment (valueTreeState, "latentVariable6", latentVariable6Slider));
+  latentVariable6Slider.setSliderStyle(juce::Slider::LinearHorizontal);
+  latentVariable6Slider.setTextBoxStyle (juce::Slider::TextBoxLeft, false, latentVariable6Slider.getTextBoxWidth(), latentVariable6Slider.getTextBoxHeight());  
+  latentVariable6Slider.setColour(juce::Slider::backgroundColourId, juce::Colours::white);
+  latentVariable6Slider.setColour(juce::Slider::trackColourId, juce::Colours::greenyellow.withAlpha(0.75f));
+  latentVariable6Slider.setColour(juce::Slider::thumbColourId , juce::Colours::greenyellow.brighter(1.5));
+  latentVariable6Slider.setColour(juce::Slider::textBoxTextColourId, juce::Colours::black);
+  latentVariable6Slider.setColour(juce::Slider::textBoxOutlineColourId , juce::Colours::greenyellow);
+
+  addAndMakeVisible(latentVariable7Meter);
+  latentVariable7Meter.setColour(juce::Label::textColourId, juce::Colours::black);
+  latentVariable7Meter.setColour(juce::Label::backgroundColourId, juce::Colours::greenyellow);  
+  addAndMakeVisible(latentVariable7Label);
+  latentVariable7Label.setText ("latentVariable 7", juce::dontSendNotification);
+  latentVariable7Label.setColour(juce::Label::textColourId, juce::Colours::black);
+
+  addAndMakeVisible(latentVariable7Slider);
+  latentVariable7SliderAttachment.reset (new SliderAttachment (valueTreeState, "latentVariable7", latentVariable7Slider));
+  latentVariable7Slider.setSliderStyle(juce::Slider::LinearHorizontal);
+  latentVariable7Slider.setTextBoxStyle (juce::Slider::TextBoxLeft, false, latentVariable7Slider.getTextBoxWidth(), latentVariable7Slider.getTextBoxHeight());  
+  latentVariable7Slider.setColour(juce::Slider::backgroundColourId, juce::Colours::white);
+  latentVariable7Slider.setColour(juce::Slider::trackColourId, juce::Colours::greenyellow.withAlpha(0.75f));
+  latentVariable7Slider.setColour(juce::Slider::thumbColourId , juce::Colours::greenyellow.brighter(1.5));
+  latentVariable7Slider.setColour(juce::Slider::textBoxTextColourId, juce::Colours::black);
+  latentVariable7Slider.setColour(juce::Slider::textBoxOutlineColourId , juce::Colours::greenyellow);
+
+  addAndMakeVisible(latentVariable8Meter);
+  latentVariable8Meter.setColour(juce::Label::textColourId, juce::Colours::black);
+  latentVariable8Meter.setColour(juce::Label::backgroundColourId, juce::Colours::greenyellow);
+  addAndMakeVisible(latentVariable8Label);
+  latentVariable8Label.setText ("latentVariable 8", juce::dontSendNotification);  
+  latentVariable8Label.setColour(juce::Label::textColourId, juce::Colours::black);
+
+  addAndMakeVisible(latentVariable8Slider);
+  latentVariable8SliderAttachment.reset (new SliderAttachment (valueTreeState, "latentVariable8", latentVariable8Slider));
+  latentVariable8Slider.setSliderStyle(juce::Slider::LinearHorizontal);
+  latentVariable8Slider.setTextBoxStyle (juce::Slider::TextBoxLeft, false, latentVariable8Slider.getTextBoxWidth(), latentVariable8Slider.getTextBoxHeight());  
+  latentVariable8Slider.setColour(juce::Slider::backgroundColourId, juce::Colours::white);
+  latentVariable8Slider.setColour(juce::Slider::trackColourId, juce::Colours::greenyellow.withAlpha(0.75f));
+  latentVariable8Slider.setColour(juce::Slider::thumbColourId , juce::Colours::greenyellow.brighter(1.5));
+  latentVariable8Slider.setColour(juce::Slider::textBoxTextColourId, juce::Colours::black);
+  latentVariable8Slider.setColour(juce::Slider::textBoxOutlineColourId , juce::Colours::greenyellow);   
+
+  startTimer(42); 
+
   addAndMakeVisible(midiKeyboardComponent);
   midiKeyboardState.addListener(&processorRef.getMidiMessageCollector());
 
-  setSize(620, 520);
+  setSize(920, 520);
 }
 
 void RAVE_for_MIDISynthesiser_ProcessorEditor::paint (juce::Graphics& g)
@@ -166,34 +304,67 @@ void RAVE_for_MIDISynthesiser_ProcessorEditor::resized()
 {
 
   auto area = getLocalBounds();
-  auto componentWidth1 = (area.getWidth() - 80 ) / 3; 
-  auto componentWidth2 = (area.getWidth() - 100 ) / 4;
-  auto componentHeight = (area.getHeight()-  100)/ 10 ;
-  auto padding = 20;          
+  auto componentWidth1 = (area.getWidth() / 2 - 80 ) / 3; 
+  auto componentWidth2 = (area.getWidth() / 2  - 100 ) / 4;
+  auto componentWidth3 = (area.getWidth() / 2  - 30) / 9;
+  auto componentHeight1 = (area.getHeight()-  100)/ 10 ;
+  auto componentHeight2 = (area.getHeight()-  200 - (componentHeight1 * 3)) / 9 ;
+  auto padding1 = 20; 
+  auto padding2 = 10;         
 
-  MixSlider.setBounds(padding,  padding + 15, componentWidth1 ,  componentHeight * 3 - 15);
-  GainSlider.setBounds(MixSlider.getRight() + padding, padding + 15, componentWidth1 , componentHeight * 3 - 15);
-  //modelComboBox.setBounds(GainSlider.getRight() + padding, padding + 40, componentWidth1 , componentHeight );
+  MixSlider.setBounds(padding1,  padding1 + 15, componentWidth1 ,  componentHeight1 * 3 - 15);
+  GainSlider.setBounds(MixSlider.getRight() + padding1, padding1 + 15, componentWidth1 , componentHeight1 * 3 - 15);
+  //modelComboBox.setBounds(GainSlider.getRight() + padding1, padding1 + 40, componentWidth1 , componentHeight1 );
   
 
   int graphHeight = 60;
-  int graphPadding = 10;
+  int graphpadding1 = 10;
   adsrGraphArea = juce::Rectangle<int>(
       AttackSlider.getX(),
-      AttackSlider.getBottom() + graphPadding,
+      AttackSlider.getBottom() + graphpadding1,
       ReleaseSlider.getRight() - AttackSlider.getX(),
       graphHeight
   );
 
-  adsrGraphArea.setBounds(padding, MixSlider.getBottom() + padding, area.getWidth() - 40, componentHeight * 2 );
+  adsrGraphArea.setBounds(padding1, MixSlider.getBottom() + padding1, area.getWidth() / 2 - 40, componentHeight1 * 2 );
 
 
-  AttackSlider.setBounds(padding, adsrGraphArea.getBottom() + padding + 15, componentWidth2 , componentHeight * 2);
-  DecaySlider.setBounds(AttackSlider.getRight() + padding, adsrGraphArea.getBottom()+ padding + 15, componentWidth2 , componentHeight * 2);
-  SustainSlider.setBounds(DecaySlider.getRight() + padding, adsrGraphArea.getBottom()+ padding + 15, componentWidth2 , componentHeight * 2);
-  ReleaseSlider.setBounds(SustainSlider.getRight() + padding, adsrGraphArea.getBottom()+ padding + 15, componentWidth2 , componentHeight* 2); 
+  AttackSlider.setBounds(padding1, adsrGraphArea.getBottom() + padding1 + 15, componentWidth2 , componentHeight1 * 2);
+  DecaySlider.setBounds(AttackSlider.getRight() + padding1, adsrGraphArea.getBottom()+ padding1 + 15, componentWidth2 , componentHeight1 * 2);
+  SustainSlider.setBounds(DecaySlider.getRight() + padding1, adsrGraphArea.getBottom()+ padding1 + 15, componentWidth2 , componentHeight1 * 2);
+  ReleaseSlider.setBounds(SustainSlider.getRight() + padding1, adsrGraphArea.getBottom()+ padding1 + 15, componentWidth2 , componentHeight1* 2);
+
+  ScaleLabel.setBounds(area.getWidth() / 2 + (componentWidth3 * 6)  , padding1, componentWidth3 * 2, componentHeight2);
   
-  midiKeyboardComponent.setBounds(padding, AttackSlider.getBottom() + padding, area.getWidth() - 40, componentHeight* 3);
+  latentVariable1Label.setBounds(ReleaseSlider.getRight() + padding2 , ScaleLabel.getBottom() + padding1, componentWidth3 * 2, componentHeight2);
+  latentVariable2Label.setBounds(ReleaseSlider.getRight() + padding2 , latentVariable1Label.getBottom() + padding1 , componentWidth3 * 2, componentHeight2);
+  latentVariable3Label.setBounds(ReleaseSlider.getRight() + padding2 , latentVariable2Label.getBottom() + padding1 , componentWidth3 * 2, componentHeight2);
+  latentVariable4Label.setBounds(ReleaseSlider.getRight() + padding2 , latentVariable3Label.getBottom() + padding1 , componentWidth3 * 2, componentHeight2);
+  latentVariable5Label.setBounds(ReleaseSlider.getRight() + padding2 , latentVariable4Label.getBottom() + padding1 , componentWidth3 * 2, componentHeight2);
+  latentVariable6Label.setBounds(ReleaseSlider.getRight() + padding2 , latentVariable5Label.getBottom() + padding1 , componentWidth3 * 2, componentHeight2);
+  latentVariable7Label.setBounds(ReleaseSlider.getRight() + padding2 , latentVariable6Label.getBottom() + padding1 , componentWidth3 * 2, componentHeight2);
+  latentVariable8Label.setBounds(ReleaseSlider.getRight() + padding2 , latentVariable7Label.getBottom() + padding1 , componentWidth3 * 2, componentHeight2);
+
+  latentVariable1Meter.setBounds(latentVariable1Label.getRight() + padding2, latentVariable1Label.getY(), componentWidth3 * 4, componentHeight2);
+  latentVariable2Meter.setBounds(latentVariable1Label.getRight() + padding2, latentVariable2Label.getY(), componentWidth3 * 4, componentHeight2);
+  latentVariable3Meter.setBounds(latentVariable1Label.getRight() + padding2, latentVariable3Label.getY(), componentWidth3 * 4, componentHeight2);
+  latentVariable4Meter.setBounds(latentVariable1Label.getRight() + padding2, latentVariable4Label.getY(), componentWidth3 * 4, componentHeight2);
+  latentVariable5Meter.setBounds(latentVariable1Label.getRight() + padding2, latentVariable5Label.getY(), componentWidth3 * 4, componentHeight2);
+  latentVariable6Meter.setBounds(latentVariable1Label.getRight() + padding2, latentVariable6Label.getY(), componentWidth3 * 4, componentHeight2);
+  latentVariable7Meter.setBounds(latentVariable1Label.getRight() + padding2, latentVariable7Label.getY(), componentWidth3 * 4, componentHeight2);
+  latentVariable8Meter.setBounds(latentVariable1Label.getRight() + padding2, latentVariable8Label.getY(), componentWidth3 * 4, componentHeight2);
+  
+  
+  latentVariable1Slider.setBounds(latentVariable1Meter.getRight() , latentVariable1Meter.getY(), componentWidth3 * 3 , componentHeight2);
+  latentVariable2Slider.setBounds(latentVariable1Meter.getRight() , latentVariable2Meter.getY(), componentWidth3 * 3 , componentHeight2);
+  latentVariable3Slider.setBounds(latentVariable1Meter.getRight() , latentVariable3Meter.getY(), componentWidth3 * 3 , componentHeight2);
+  latentVariable4Slider.setBounds(latentVariable1Meter.getRight() , latentVariable4Meter.getY(), componentWidth3 * 3 , componentHeight2);
+  latentVariable5Slider.setBounds(latentVariable1Meter.getRight() , latentVariable5Meter.getY(), componentWidth3 * 3 , componentHeight2);
+  latentVariable6Slider.setBounds(latentVariable1Meter.getRight() , latentVariable6Meter.getY(), componentWidth3 * 3 , componentHeight2);
+  latentVariable7Slider.setBounds(latentVariable1Meter.getRight() , latentVariable7Meter.getY(), componentWidth3 * 3 , componentHeight2);
+  latentVariable8Slider.setBounds(latentVariable1Meter.getRight() , latentVariable8Meter.getY(), componentWidth3 * 3 , componentHeight2);
+  
+  midiKeyboardComponent.setBounds(padding1, AttackSlider.getBottom() + padding1, area.getWidth() - 40, componentHeight1* 3);
 
   MixLabel.setBounds(MixSlider.getX(), MixSlider.getY() - 15, MixSlider.getWidth(),MixSlider.getTextBoxHeight() );
   GainLabel.setBounds(GainSlider.getX(), GainSlider.getY() - 15, GainSlider.getWidth(),GainSlider.getTextBoxHeight() );
@@ -202,6 +373,7 @@ void RAVE_for_MIDISynthesiser_ProcessorEditor::resized()
   DecayLabel.setBounds(DecaySlider.getX(), DecaySlider.getY() - 15, DecaySlider.getWidth(), DecaySlider.getTextBoxHeight());
   SustainLabel.setBounds(SustainSlider.getX(), SustainSlider.getY() - 15, SustainSlider.getWidth(), SustainSlider.getTextBoxHeight());
   ReleaseLabel.setBounds(ReleaseSlider.getX(), ReleaseSlider.getY() - 15, ReleaseSlider.getWidth(), ReleaseSlider.getTextBoxHeight());
+
 }
 
 void RAVE_for_MIDISynthesiser_ProcessorEditor::sliderValueChanged(juce::Slider* slider)
@@ -242,3 +414,18 @@ void RAVE_for_MIDISynthesiser_ProcessorEditor::ADSRGraph(juce::Graphics& g)
   g.strokePath(adsrPath, juce::PathStrokeType(2.0f));
 
 }
+
+
+
+void RAVE_for_MIDISynthesiser_ProcessorEditor::timerCallback()
+{
+  latentVariable2Meter.setValue(processorRef.getLatentVariables(1));
+  latentVariable3Meter.setValue(processorRef.getLatentVariables(2));
+  latentVariable4Meter.setValue(processorRef.getLatentVariables(3));
+  latentVariable5Meter.setValue(processorRef.getLatentVariables(4));
+  latentVariable6Meter.setValue(processorRef.getLatentVariables(5));
+  latentVariable7Meter.setValue(processorRef.getLatentVariables(6));
+  latentVariable8Meter.setValue(processorRef.getLatentVariables(7)); 
+  latentVariable1Meter.setValue(processorRef.getLatentVariables(8)); 
+}
+

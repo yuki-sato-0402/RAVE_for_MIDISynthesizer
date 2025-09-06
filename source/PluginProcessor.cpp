@@ -249,7 +249,6 @@ void RAVE_for_MIDISynthesiser_Processor::processBlock (juce::AudioBuffer<float>&
     dry_wet_mixer.pushDrySamples(buffer);
 
     // For the RAVE model, we need to process the encoder and decoder separately.
-    float latent_space[8][1];
     float* latent_space_ptrs[8];
     for (int i = 0; i < 8; ++i) {
         latent_space_ptrs[i] = latent_space[i];
@@ -274,13 +273,13 @@ void RAVE_for_MIDISynthesiser_Processor::processBlock (juce::AudioBuffer<float>&
         latent_space[5][0] *= latentVariable6Param;
         latent_space[6][0] *= latentVariable7Param;
         latent_space[7][0] *= latentVariable8Param;
+
         //std::cout << "Latent space values: ";
         //for (int i = 0; i < 8; ++i) {
         //    std::cout << latent_space[i][0] << " ";
         //}
         //std::cout << std::endl;
 
-        
         inference_handler_decoder.push_data(latent_space_ptrs, received_samples);
     }
     inference_handler_decoder.pop_data(buffer.getArrayOfWritePointers(), (size_t) buffer.getNumSamples());
@@ -408,6 +407,29 @@ void RAVE_for_MIDISynthesiser_Processor::processesNonRealtime(const juce::AudioB
     double durationInSeconds = static_cast<double>(buffer.getNumSamples()) / getSampleRate();
     auto durationInMilliseconds = std::chrono::duration<double, std::milli>(durationInSeconds * 1000);
     std::this_thread::sleep_for(durationInMilliseconds);
+}
+
+float RAVE_for_MIDISynthesiser_Processor::getLatentVariables(const int index) {
+    switch (index) {
+        case 1:
+            return latent_space[0][0];
+        case 2:
+            return latent_space[1][0];
+        case 3:
+            return latent_space[2][0];
+        case 4:
+            return latent_space[3][0];
+        case 5:
+            return latent_space[4][0];
+        case 6:
+            return latent_space[5][0];
+        case 7:
+            return latent_space[6][0];
+        case 8:
+            return latent_space[7][0];
+        default:
+            throw std::out_of_range("Index must be between 1 and 8.");
+    }
 }
 
 //==============================================================================

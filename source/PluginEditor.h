@@ -5,6 +5,7 @@
 #include "PluginProcessor.h"
 #include "RaveModelConfigDecoder.h"
 #include "RaveModelConfigEncoder.h"
+#include "HorizontalMeter.h"
 
 /*
   ==============================================================================
@@ -14,7 +15,7 @@
   ==============================================================================
 */
 
-class RAVE_for_MIDISynthesiser_ProcessorEditor  : public juce::AudioProcessorEditor, public juce::Slider::Listener
+class RAVE_for_MIDISynthesiser_ProcessorEditor  : public juce::AudioProcessorEditor, public juce::Slider::Listener, private juce::Timer
 {
 public:
   RAVE_for_MIDISynthesiser_ProcessorEditor(RAVE_for_MIDISynthesiser_Processor& p, juce::AudioProcessorValueTreeState& vts);
@@ -25,6 +26,7 @@ public:
   void resized() override; 
   void sliderValueChanged(juce::Slider* slider) override;
   void ADSRGraph(juce::Graphics& g);
+  void timerCallback() override;
   typedef juce::AudioProcessorValueTreeState::SliderAttachment SliderAttachment;
   typedef juce::AudioProcessorValueTreeState::ComboBoxAttachment ComboBoxAttachment;
 
@@ -39,6 +41,14 @@ private:
   juce::Slider  DecaySlider;
   juce::Slider  SustainSlider;
   juce::Slider  ReleaseSlider;
+  juce::Slider  latentVariable1Slider;
+  juce::Slider  latentVariable2Slider;
+  juce::Slider  latentVariable3Slider;
+  juce::Slider  latentVariable4Slider;
+  juce::Slider  latentVariable5Slider;
+  juce::Slider  latentVariable6Slider;
+  juce::Slider  latentVariable7Slider;
+  juce::Slider  latentVariable8Slider;
   
   //juce::ComboBox modelComboBox;
   //juce::StringArray modelFileNames;
@@ -50,6 +60,15 @@ private:
   juce::Label  SustainLabel;
   juce::Label  ReleaseLabel;
   //juce::Label  modelLabel;
+  juce::Label  ScaleLabel;
+  juce::Label  latentVariable1Label;
+  juce::Label  latentVariable2Label;
+  juce::Label  latentVariable3Label;
+  juce::Label  latentVariable4Label;
+  juce::Label  latentVariable5Label;   
+  juce::Label  latentVariable6Label;
+  juce::Label  latentVariable7Label;
+  juce::Label  latentVariable8Label;
 
   std::unique_ptr<SliderAttachment> MixSliderAttachment;
   std::unique_ptr<SliderAttachment> GainSliderAttachment;
@@ -57,6 +76,14 @@ private:
   std::unique_ptr<SliderAttachment> DecaySliderAttachment;
   std::unique_ptr<SliderAttachment> SustainSliderAttachment;
   std::unique_ptr<SliderAttachment> ReleaseSliderAttachment;
+  std::unique_ptr<SliderAttachment> latentVariable1SliderAttachment;
+  std::unique_ptr<SliderAttachment> latentVariable2SliderAttachment;
+  std::unique_ptr<SliderAttachment> latentVariable3SliderAttachment;
+  std::unique_ptr<SliderAttachment> latentVariable4SliderAttachment;
+  std::unique_ptr<SliderAttachment> latentVariable5SliderAttachment;
+  std::unique_ptr<SliderAttachment> latentVariable6SliderAttachment;
+  std::unique_ptr<SliderAttachment> latentVariable7SliderAttachment;
+  std::unique_ptr<SliderAttachment> latentVariable8SliderAttachment;
 
   //std::unique_ptr<ComboBoxAttachment> comboBoxAttachment;
 
@@ -64,6 +91,10 @@ private:
   juce::MidiKeyboardComponent midiKeyboardComponent { midiKeyboardState, juce::MidiKeyboardComponent::horizontalKeyboard };
 
   juce::Rectangle<int> adsrGraphArea;
+
+  HorizontalMeter latentVariable1Meter, latentVariable2Meter, latentVariable3Meter, latentVariable4Meter,
+      latentVariable5Meter, latentVariable6Meter, latentVariable7Meter, latentVariable8Meter;
+
 
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RAVE_for_MIDISynthesiser_ProcessorEditor)
 };

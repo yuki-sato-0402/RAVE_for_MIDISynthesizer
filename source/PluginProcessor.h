@@ -49,6 +49,9 @@ public:
 
     juce::MidiMessageCollector& getMidiMessageCollector() noexcept { return midiMessageCollector; }
 
+    //==============================================================================
+    float getLatentVariables(const int index);
+
 private:
     void parameterChanged (const juce::String& parameterID, float newValue) override;
 
@@ -82,6 +85,7 @@ private:
     float gainParam;
     int modelIndex;
 
+    float latent_space[8][1];
     float latentVariable1Param = 0.0f;
     float latentVariable2Param = 0.0f;
     float latentVariable3Param = 0.0f;

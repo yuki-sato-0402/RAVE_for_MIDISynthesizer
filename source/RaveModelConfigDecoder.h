@@ -26,7 +26,7 @@ static anira::InferenceConfig rave_model_decoder_config(
     model_data_rave_model_decoder_config,
     tensor_shape_rave_model_decoder_config,
     processing_spec_rave_model_decoder_config,
-    100.00f,
+    120.00f,
     5,
     true // session_exclusive_processor because of cached convolution layers in the model
 );

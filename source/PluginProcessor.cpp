@@ -227,6 +227,7 @@ void RAVE_for_MIDISynthesiser_Processor::processBlock (juce::AudioBuffer<float>&
     for (const auto metadata : midiMessages)
     {
         const auto msg = metadata.getMessage();
+        std::cout << "MIDI message received: " << msg.getDescription() << std::endl;
         if (msg.isNoteOn())
         {
             int noteNumber = msg.getNoteNumber();
@@ -250,6 +251,7 @@ void RAVE_for_MIDISynthesiser_Processor::processBlock (juce::AudioBuffer<float>&
 
     // For the RAVE model, we need to process the encoder and decoder separately.
     float* latent_space_ptrs[8];
+    float latent_space[8][1];
     for (int i = 0; i < 8; ++i) {
         latent_space_ptrs[i] = latent_space[i];
     }
@@ -265,23 +267,27 @@ void RAVE_for_MIDISynthesiser_Processor::processBlock (juce::AudioBuffer<float>&
             m_count_input_samples -= 2048;
         }
         // Make some latent space modulation :)
-        latent_space[0][0] *= latentVariable1Param;
-        latent_space[1][0] *= latentVariable2Param;
-        latent_space[2][0] *= latentVariable3Param;
-        latent_space[3][0] *= latentVariable4Param;
-        latent_space[4][0] *= latentVariable5Param;
-        latent_space[5][0] *= latentVariable6Param;
-        latent_space[6][0] *= latentVariable7Param;
-        latent_space[7][0] *= latentVariable8Param;
+        scaledValue1 = latent_space[0][0] * latentVariable1Param;
+        latent_space[0][0] = scaledValue1; 
+        scaledValue2 = latent_space[1][0] * latentVariable2Param;
+        latent_space[1][0] = scaledValue2;
+        scaledValue3 = latent_space[2][0] * latentVariable3Param;
+        latent_space[2][0] = scaledValue3;
+        scaledValue4 = latent_space[3][0] * latentVariable4Param;
+        latent_space[3][0] = scaledValue4;
+        scaledValue5 = latent_space[4][0] * latentVariable5Param;
+        latent_space[4][0] = scaledValue5;
+        scaledValue6 = latent_space[5][0] * latentVariable6Param;    
+        latent_space[5][0] = scaledValue6;
+        scaledValue7 = latent_space[6][0] * latentVariable7Param;    
+        latent_space[6][0] = scaledValue7;
+        scaledValue8 = latent_space[7][0] * latentVariable8Param;    
+        latent_space[7][0] = scaledValue8;  
 
-        //std::cout << "Latent space values: ";
-        //for (int i = 0; i < 8; ++i) {
-        //    std::cout << latent_space[i][0] << " ";
-        //}
-        //std::cout << std::endl;
 
         inference_handler_decoder.push_data(latent_space_ptrs, received_samples);
     }
+
     inference_handler_decoder.pop_data(buffer.getArrayOfWritePointers(), (size_t) buffer.getNumSamples());
     
     dry_wet_mixer.mixWetSamples(buffer);
@@ -412,21 +418,21 @@ void RAVE_for_MIDISynthesiser_Processor::processesNonRealtime(const juce::AudioB
 float RAVE_for_MIDISynthesiser_Processor::getLatentVariables(const int index) {
     switch (index) {
         case 1:
-            return latent_space[0][0];
+            return scaledValue1;
         case 2:
-            return latent_space[1][0];
+            return scaledValue2;
         case 3:
-            return latent_space[2][0];
+            return scaledValue3;
         case 4:
-            return latent_space[3][0];
+            return scaledValue4;
         case 5:
-            return latent_space[4][0];
+            return scaledValue5;
         case 6:
-            return latent_space[5][0];
+            return scaledValue6;
         case 7:
-            return latent_space[6][0];
+            return scaledValue7;
         case 8:
-            return latent_space[7][0];
+            return scaledValue8;
         default:
             throw std::out_of_range("Index must be between 1 and 8.");
     }

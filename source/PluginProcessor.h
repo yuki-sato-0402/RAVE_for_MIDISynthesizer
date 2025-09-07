@@ -85,7 +85,6 @@ private:
     float gainParam;
     int modelIndex;
 
-    float latent_space[8][1];
     float latentVariable1Param = 0.0f;
     float latentVariable2Param = 0.0f;
     float latentVariable3Param = 0.0f;
@@ -94,6 +93,15 @@ private:
     float latentVariable6Param = 0.0f;
     float latentVariable7Param = 0.0f;
     float latentVariable8Param = 0.0f;
+
+    float scaledValue1 = 0.0f;
+    float scaledValue2 = 0.0f;
+    float scaledValue3 = 0.0f;
+    float scaledValue4 = 0.0f;
+    float scaledValue5 = 0.0f;
+    float scaledValue6 = 0.0f;
+    float scaledValue7 = 0.0f;
+    float scaledValue8 = 0.0f;
 
     double mutedSamples = 0;
     int64_t totalSamplesProcessed = 0;

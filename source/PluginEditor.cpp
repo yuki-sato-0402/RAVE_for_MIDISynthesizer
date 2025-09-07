@@ -286,7 +286,7 @@ RAVE_for_MIDISynthesiser_ProcessorEditor::RAVE_for_MIDISynthesiser_ProcessorEdit
   latentVariable8Slider.setColour(juce::Slider::textBoxTextColourId, juce::Colours::black);
   latentVariable8Slider.setColour(juce::Slider::textBoxOutlineColourId , juce::Colours::greenyellow);   
 
-  startTimer(42); 
+  startTimer(100); 
 
   addAndMakeVisible(midiKeyboardComponent);
   midiKeyboardState.addListener(&processorRef.getMidiMessageCollector());
@@ -419,13 +419,13 @@ void RAVE_for_MIDISynthesiser_ProcessorEditor::ADSRGraph(juce::Graphics& g)
 
 void RAVE_for_MIDISynthesiser_ProcessorEditor::timerCallback()
 {
-  latentVariable2Meter.setValue(processorRef.getLatentVariables(1));
-  latentVariable3Meter.setValue(processorRef.getLatentVariables(2));
-  latentVariable4Meter.setValue(processorRef.getLatentVariables(3));
-  latentVariable5Meter.setValue(processorRef.getLatentVariables(4));
-  latentVariable6Meter.setValue(processorRef.getLatentVariables(5));
-  latentVariable7Meter.setValue(processorRef.getLatentVariables(6));
-  latentVariable8Meter.setValue(processorRef.getLatentVariables(7)); 
-  latentVariable1Meter.setValue(processorRef.getLatentVariables(8)); 
+  latentVariable1Meter.setValue(processorRef.getLatentVariables(1)); 
+  latentVariable2Meter.setValue(processorRef.getLatentVariables(2));
+  latentVariable3Meter.setValue(processorRef.getLatentVariables(3));
+  latentVariable4Meter.setValue(processorRef.getLatentVariables(4));
+  latentVariable5Meter.setValue(processorRef.getLatentVariables(5));
+  latentVariable6Meter.setValue(processorRef.getLatentVariables(6));
+  latentVariable7Meter.setValue(processorRef.getLatentVariables(7));
+  latentVariable8Meter.setValue(processorRef.getLatentVariables(8));
 }
 

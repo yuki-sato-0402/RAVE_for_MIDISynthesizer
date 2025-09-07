@@ -5,7 +5,7 @@
 
 static std::vector<anira::ModelData> model_data_rave_model_encoder_config = {
 #ifdef USE_LIBTORCH
-    {RAVE_MODEL_DIR + std::string("altoSaxV1_e02d7ebfe3_streaming_norm.ts"), anira::InferenceBackend::LIBTORCH, std::string("encode")},
+    {RAVE_MODEL_DIR + std::string("waterV1_e02d7ebfe3_streaming_norm8.ts"), anira::InferenceBackend::LIBTORCH, std::string("encode")},
 #endif
 };
 
@@ -23,9 +23,9 @@ static anira::InferenceConfig rave_model_encoder_config(
     model_data_rave_model_encoder_config,
     tensor_shape_rave_model_encoder_config,
     processing_spec_rave_model_encoder_config,
-    120.00f,
+    160.00f,
     5,
-    true // session_exclusive_processor because of cached convolution layers in the model
+    false // session_exclusive_processor because of cached convolution layers in the model
 );
 
 #endif //ANIRA_RAVE_model_CONFIG_ENCODER_H

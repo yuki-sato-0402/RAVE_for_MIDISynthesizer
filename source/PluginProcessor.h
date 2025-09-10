@@ -6,7 +6,7 @@
 #include "RaveModelConfigEncoder.h"
 
 //==============================================================================
-class RAVE_for_MIDISynthesiser_Processor  : public juce::AudioProcessor, public juce::AudioProcessorValueTreeState::Listener
+class RAVE_for_MIDISynthesiser_Processor  : public juce::AudioProcessor, public juce::AudioProcessorValueTreeState::Listener, public juce::ActionBroadcaster
 {
 public:
     //==============================================================================
@@ -85,23 +85,25 @@ private:
     float gainParam;
     int modelIndex;
 
-    float latentVariable1Param = 0.0f;
-    float latentVariable2Param = 0.0f;
-    float latentVariable3Param = 0.0f;
-    float latentVariable4Param = 0.0f;
-    float latentVariable5Param = 0.0f;
-    float latentVariable6Param = 0.0f;
-    float latentVariable7Param = 0.0f;
-    float latentVariable8Param = 0.0f;
+    //midi control
+    int rootNote = -1;         // First Notes
+    size_t loopStep = 0;          // Current step position (0..8)
+    int lastNote = -1;         // Previous notes
+    bool noteActive = false;   // Is the first one on?
+    bool waitingForRelease = false; // To proceed, wait for the off signal.
 
-    float scaledValue1 = 0.0f;
-    float scaledValue2 = 0.0f;
-    float scaledValue3 = 0.0f;
-    float scaledValue4 = 0.0f;
-    float scaledValue5 = 0.0f;
-    float scaledValue6 = 0.0f;
-    float scaledValue7 = 0.0f;
-    float scaledValue8 = 0.0f;
+    float latent_space[8][1];
+    float latentVariableBias[8] = { 0 }; 
+
+    float latentVariable1ScaleParam = 0.0f;
+    float latentVariable2ScaleParam = 0.0f;
+    float latentVariable3ScaleParam = 0.0f;
+    float latentVariable4ScaleParam = 0.0f;
+    float latentVariable5ScaleParam = 0.0f;
+    float latentVariable6ScaleParam = 0.0f;
+    float latentVariable7ScaleParam = 0.0f;
+    float latentVariable8ScaleParam = 0.0f;
+
 
     double mutedSamples = 0;
     int64_t totalSamplesProcessed = 0;

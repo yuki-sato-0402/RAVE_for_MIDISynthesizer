@@ -15,7 +15,7 @@
   ==============================================================================
 */
 
-class RAVE_for_MIDISynthesiser_ProcessorEditor  : public juce::AudioProcessorEditor, public juce::Slider::Listener, private juce::Timer
+class RAVE_for_MIDISynthesiser_ProcessorEditor  : public juce::AudioProcessorEditor, public juce::Slider::Listener, private juce::Timer, public juce::ActionListener
 {
 public:
   RAVE_for_MIDISynthesiser_ProcessorEditor(RAVE_for_MIDISynthesiser_Processor& p, juce::AudioProcessorValueTreeState& vts);
@@ -27,6 +27,7 @@ public:
   void sliderValueChanged(juce::Slider* slider) override;
   void ADSRGraph(juce::Graphics& g);
   void timerCallback() override;
+  void actionListenerCallback(const juce::String& message) override;
   typedef juce::AudioProcessorValueTreeState::SliderAttachment SliderAttachment;
   typedef juce::AudioProcessorValueTreeState::ComboBoxAttachment ComboBoxAttachment;
 
@@ -69,6 +70,19 @@ private:
   juce::Label  latentVariable6Label;
   juce::Label  latentVariable7Label;
   juce::Label  latentVariable8Label;
+
+  juce::Label  BiasLabel;
+  juce::Label  latentVariable1BiasLabel;
+  juce::Label  latentVariable2BiasLabel;
+  juce::Label  latentVariable3BiasLabel;
+  juce::Label  latentVariable4BiasLabel;
+  juce::Label  latentVariable5BiasLabel;
+  juce::Label  latentVariable6BiasLabel;
+  juce::Label  latentVariable7BiasLabel;
+  juce::Label  latentVariable8BiasLabel;
+  void updateBiasLabel(juce::Label& label);
+  float bias = 0;
+  juce::Label* previousBias = nullptr;  
 
   std::unique_ptr<SliderAttachment> MixSliderAttachment;
   std::unique_ptr<SliderAttachment> GainSliderAttachment;

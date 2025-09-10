@@ -74,14 +74,14 @@ RAVE_for_MIDISynthesiser_Processor::RAVE_for_MIDISynthesiser_Processor()
     adsrParams.decay = *parameters.getRawParameterValue("decayTime") / 1000.0f;  
     adsrParams.sustain = *parameters.getRawParameterValue("sustain") / 100.0f;         
     adsrParams.release = *parameters.getRawParameterValue("releaseTime") / 1000.0f; 
-    latentVariable1Param = *parameters.getRawParameterValue("latentVariable1");
-    latentVariable2Param = *parameters.getRawParameterValue("latentVariable2");
-    latentVariable3Param = *parameters.getRawParameterValue("latentVariable3");
-    latentVariable4Param = *parameters.getRawParameterValue("latentVariable4");
-    latentVariable5Param = *parameters.getRawParameterValue("latentVariable5");
-    latentVariable6Param = *parameters.getRawParameterValue("latentVariable6");
-    latentVariable7Param = *parameters.getRawParameterValue("latentVariable7");
-    latentVariable8Param = *parameters.getRawParameterValue("latentVariable8");
+    latentVariable1ScaleParam = *parameters.getRawParameterValue("latentVariable1");
+    latentVariable2ScaleParam = *parameters.getRawParameterValue("latentVariable2");
+    latentVariable3ScaleParam = *parameters.getRawParameterValue("latentVariable3");
+    latentVariable4ScaleParam = *parameters.getRawParameterValue("latentVariable4");
+    latentVariable5ScaleParam = *parameters.getRawParameterValue("latentVariable5");
+    latentVariable6ScaleParam = *parameters.getRawParameterValue("latentVariable6");
+    latentVariable7ScaleParam = *parameters.getRawParameterValue("latentVariable7");
+    latentVariable8ScaleParam = *parameters.getRawParameterValue("latentVariable8");
 }
 
 
@@ -227,18 +227,64 @@ void RAVE_for_MIDISynthesiser_Processor::processBlock (juce::AudioBuffer<float>&
     for (const auto metadata : midiMessages)
     {
         const auto msg = metadata.getMessage();
-        std::cout << "MIDI message received: " << msg.getDescription() << std::endl;
+
         if (msg.isNoteOn())
         {
             int noteNumber = msg.getNoteNumber();
-            double freq = juce::MidiMessage::getMidiNoteInHertz(noteNumber);
-            osc.setFrequency(static_cast<float>(freq));
-            adsr.noteOn(); 
-        }else if (msg.isNoteOff())
+
+            // === First Note-On ===
+            if (!noteActive && loopStep == 0)
+            {
+                rootNote = noteNumber;
+                double freq = juce::MidiMessage::getMidiNoteInHertz(rootNote);
+                osc.setFrequency(static_cast<float>(freq));
+                adsr.noteOn();
+
+                noteActive = true;
+                loopStep = 1; 
+                lastNote = rootNote;
+
+                //std::cout << "Root Note On: " << rootNote << std::endl;
+            }
+            // === Second to Ninth Time ===
+            else if (noteActive && loopStep > 0 && loopStep <= 8 && !waitingForRelease)
+            {
+                int diff = noteNumber - rootNote;
+
+                latentVariableBias[loopStep - 1] = (static_cast<float>(diff) / 12) * 2.5;
+
+                lastNote = noteNumber;
+                waitingForRelease = true; // Next up: waiting for the off
+                sendActionMessage("NoteOn" + juce::String(latentVariableBias[loopStep - 1]) + ","  + juce::String(loopStep));
+            }
+        }
+        else if (msg.isNoteOff())
         {
-            adsr.noteOff();
+            int noteNumber = msg.getNoteNumber();
+
+            // Reset when the first one turns off
+            if (noteActive && noteNumber == rootNote)
+            {
+                noteActive = false;
+                loopStep = 0;
+                sendActionMessage("RootNoteOff");
+                adsr.noteOff();
+            }
+            // Progression Rule: Once the previous note is off, proceed to the next step.
+            else if (waitingForRelease && noteNumber == lastNote)
+            {
+                waitingForRelease = false;
+                loopStep++;
+
+                if (loopStep > 8) 
+                {
+                    loopStep = 1; // Starting from the second time
+                    std::cout << "Loop Completed -> Restart" << std::endl;
+                }
+            }
         }
     }
+
 
     juce::dsp::AudioBlock<float> audioBlock(buffer);
     //juce::dsp::ProcessContextReplacing rewrites the buffer itself.
@@ -251,7 +297,6 @@ void RAVE_for_MIDISynthesiser_Processor::processBlock (juce::AudioBuffer<float>&
 
     // For the RAVE model, we need to process the encoder and decoder separately.
     float* latent_space_ptrs[8];
-    float latent_space[8][1];
     for (int i = 0; i < 8; ++i) {
         latent_space_ptrs[i] = latent_space[i];
     }
@@ -267,23 +312,14 @@ void RAVE_for_MIDISynthesiser_Processor::processBlock (juce::AudioBuffer<float>&
             m_count_input_samples -= 2048;
         }
         // Make some latent space modulation :)
-        scaledValue1 = latent_space[0][0] * latentVariable1Param;
-        latent_space[0][0] = scaledValue1; 
-        scaledValue2 = latent_space[1][0] * latentVariable2Param;
-        latent_space[1][0] = scaledValue2;
-        scaledValue3 = latent_space[2][0] * latentVariable3Param;
-        latent_space[2][0] = scaledValue3;
-        scaledValue4 = latent_space[3][0] * latentVariable4Param;
-        latent_space[3][0] = scaledValue4;
-        scaledValue5 = latent_space[4][0] * latentVariable5Param;
-        latent_space[4][0] = scaledValue5;
-        scaledValue6 = latent_space[5][0] * latentVariable6Param;    
-        latent_space[5][0] = scaledValue6;
-        scaledValue7 = latent_space[6][0] * latentVariable7Param;    
-        latent_space[6][0] = scaledValue7;
-        scaledValue8 = latent_space[7][0] * latentVariable8Param;    
-        latent_space[7][0] = scaledValue8;  
-
+        latent_space[0][0] = latent_space[0][0] * latentVariable1ScaleParam + latentVariableBias[0];
+        latent_space[1][0] = latent_space[1][0] * latentVariable2ScaleParam + latentVariableBias[1];
+        latent_space[2][0] = latent_space[2][0] * latentVariable3ScaleParam + latentVariableBias[2];
+        latent_space[3][0] = latent_space[3][0] * latentVariable4ScaleParam + latentVariableBias[3];
+        latent_space[4][0] = latent_space[4][0] * latentVariable5ScaleParam + latentVariableBias[4];
+        latent_space[5][0] = latent_space[5][0] * latentVariable6ScaleParam + latentVariableBias[5];
+        latent_space[6][0] = latent_space[6][0] * latentVariable7ScaleParam + latentVariableBias[6];
+        latent_space[7][0] = latent_space[7][0] * latentVariable8ScaleParam + latentVariableBias[7];
 
         inference_handler_decoder.push_data(latent_space_ptrs, received_samples);
     }
@@ -376,35 +412,35 @@ void RAVE_for_MIDISynthesiser_Processor::parameterChanged(const juce::String &pa
         std::cout << "ReleaseTime changed to: " << newValue << " ms" << std::endl;
     }else if (parameterID == "latentVariable1") 
     {
-        latentVariable1Param = newValue;
+        latentVariable1ScaleParam = newValue;
         std::cout << "latentVariable1 changed to: " << newValue << std::endl;
     }else if (parameterID == "latentVariable2") 
     {
-        latentVariable2Param = newValue;
+        latentVariable2ScaleParam = newValue;
         std::cout << "latentVariable2 changed to: " << newValue << std::endl;
     }else if (parameterID == "latentVariable3") 
     {
-        latentVariable3Param = newValue;
+        latentVariable3ScaleParam = newValue;
         std::cout << "latentVariable3 changed to: " << newValue << std::endl;
     }else if (parameterID == "latentVariable4") 
     {
-        latentVariable4Param = newValue;
+        latentVariable4ScaleParam = newValue;
         std::cout << "latentVariable4 changed to: " << newValue << std::endl;
     }else if (parameterID == "latentVariable5") 
     {
-        latentVariable5Param = newValue;
+        latentVariable5ScaleParam = newValue;
         std::cout << "latentVariable5 changed to: " << newValue << std::endl;
     }else if (parameterID == "latentVariable6") 
     {
-        latentVariable6Param = newValue;
+        latentVariable6ScaleParam = newValue;
         std::cout << "latentVariable6 changed to: " << newValue << std::endl;
     }else if (parameterID == "latentVariable7") 
     {
-        latentVariable7Param = newValue;
+        latentVariable7ScaleParam = newValue;
         std::cout << "latentVariable7 changed to: " << newValue << std::endl;
     }else if (parameterID == "latentVariable8") 
     {
-        latentVariable8Param = newValue;
+        latentVariable8ScaleParam = newValue;
         std::cout << "latentVariable8 changed to: " << newValue << std::endl;
     }           
 }
@@ -416,27 +452,8 @@ void RAVE_for_MIDISynthesiser_Processor::processesNonRealtime(const juce::AudioB
 }
 
 float RAVE_for_MIDISynthesiser_Processor::getLatentVariables(const int index) {
-    switch (index) {
-        case 1:
-            return scaledValue1;
-        case 2:
-            return scaledValue2;
-        case 3:
-            return scaledValue3;
-        case 4:
-            return scaledValue4;
-        case 5:
-            return scaledValue5;
-        case 6:
-            return scaledValue6;
-        case 7:
-            return scaledValue7;
-        case 8:
-            return scaledValue8;
-        default:
-            throw std::out_of_range("Index must be between 1 and 8.");
-    }
-}
+    return latent_space[index][0];
+} 
 
 //==============================================================================
 // This creates new instances of the plugin..

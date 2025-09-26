@@ -2,9 +2,8 @@
 
 #include <JuceHeader.h>
 #include <anira/anira.h>
-#include "RaveModelConfigDecoder.h"
-#include "RaveModelConfigEncoder.h"
-
+#include "RaveModelConfig.h"
+#include "CustomBackendProcessor.h"
 //==============================================================================
 class RAVE_for_MIDISynthesiser_Processor  : public juce::AudioProcessor, public juce::AudioProcessorValueTreeState::Listener, public juce::ActionBroadcaster
 {
@@ -63,13 +62,11 @@ private:
     // Optional ContextConfig
     anira::ContextConfig anira_context_config;
 
-    anira::InferenceConfig inference_config_encoder = rave_model_encoder_config;
-    anira::InferenceConfig inference_config_decoder = rave_model_decoder_config;
-    anira::PrePostProcessor pp_processor_encoder;
-    anira::PrePostProcessor pp_processor_decoder;
-    
-    anira::InferenceHandler inference_handler_encoder;
-    anira::InferenceHandler inference_handler_decoder;
+
+    anira::InferenceConfig inference_config = rave_model_config;
+    anira::PrePostProcessor pp_processor;
+    anira::CustomBackend custom_backend;
+    anira::InferenceHandler inference_handler;
     int m_count_input_samples = 0;
 
     juce::dsp::DryWetMixer<float> dry_wet_mixer;

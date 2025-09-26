@@ -3,8 +3,7 @@
 #pragma once
 #include <JuceHeader.h>
 #include "PluginProcessor.h"
-#include "RaveModelConfigDecoder.h"
-#include "RaveModelConfigEncoder.h"
+#include "RaveModelConfig.h"
 #include "HorizontalMeter.h"
 
 /*
@@ -108,7 +107,6 @@ private:
 
   HorizontalMeter latentVariable1Meter, latentVariable2Meter, latentVariable3Meter, latentVariable4Meter,
       latentVariable5Meter, latentVariable6Meter, latentVariable7Meter, latentVariable8Meter;
-
 
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RAVE_for_MIDISynthesiser_ProcessorEditor)
 };

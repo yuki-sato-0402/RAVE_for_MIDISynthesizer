@@ -44,10 +44,10 @@ RAVE_for_MIDISynthesiser_Processor::RAVE_for_MIDISynthesiser_Processor()
         //anira_context_config(
         //    std::thread::hardware_concurrency() / 2 > 0 ? std::thread::hardware_concurrency() / 2 : 1 // Total number of threads
         //),
-        pp_processor_encoder(inference_config_encoder),
-        pp_processor_decoder(inference_config_decoder),
-        inference_handler_encoder(pp_processor_encoder, inference_config_encoder),
-        inference_handler_decoder(pp_processor_decoder, inference_config_decoder),
+        pp_processor(inference_config),
+        custom_backend(inference_config),
+        inference_handler(pp_processor, inference_config, custom_backend),
+        //In InferenceHandler.cpp, the inference_backend is set to m_inference_manager.
         dry_wet_mixer(32768) // 32768 samples of max latency compensation for the dry-wet mixer
 {
     parameters.addParameterListener("dryWetRange", this);
@@ -160,24 +160,15 @@ void RAVE_for_MIDISynthesiser_Processor::prepareToPlay (double sampleRate, int s
                                  static_cast<juce::uint32>(getTotalNumInputChannels())};
     dry_wet_mixer.prepare(spec);
 
-    anira::HostConfig host_config_encoder {
+    anira::HostConfig host_config {
         static_cast<float>(samplesPerBlock),
         static_cast<float>(sampleRate),
         // true // Shall smaller buffers be allowed? If true more latency
     };
-    // The decoder needs to be prepared with the buffer size and sample rate of the latent space.
-    anira::HostConfig host_config_decoder {
-        static_cast<float>((float) samplesPerBlock / 2048.f),
-        static_cast<float>((float) sampleRate / 2048.f),
-        // true // Shall smaller buffers be allowed?
-    };
-    inference_handler_encoder.prepare(host_config_encoder);
-    inference_handler_decoder.prepare(host_config_decoder);
+    inference_handler.prepare(host_config);
+    
 
-    // Encoder latency must be multiplied by 2048, because the encoder compresses the audio data by a factor of 2048 in the time domain.
-    int new_latency_encoder = (int) inference_handler_encoder.get_latency() * 2048;
-    int new_latency_decoder = (int) inference_handler_decoder.get_latency();
-    int new_latency = new_latency_encoder + new_latency_decoder; // The total latency is the sum of the latencies of both encoders
+    int new_latency = (int) inference_handler.get_latency();
 
     osc.prepare(spec);
     osc.setFrequency(440.0f);
@@ -193,11 +184,9 @@ void RAVE_for_MIDISynthesiser_Processor::prepareToPlay (double sampleRate, int s
     adsr.setSampleRate(sampleRate);
     adsr.setParameters(adsrParams);
 
-    #ifdef USE_LIBTORCH
-        std::cout << "$Using LibTorch backend for inference.$" << std::endl;
-        inference_handler_encoder.set_inference_backend(anira::InferenceBackend::LIBTORCH);
-        inference_handler_decoder.set_inference_backend(anira::InferenceBackend::LIBTORCH);
-    #endif
+
+    std::cout << "$Using CUSTOM backend for inference.$" << std::endl;
+    inference_handler.set_inference_backend(anira::InferenceBackend::CUSTOM);
 }
 
 void RAVE_for_MIDISynthesiser_Processor::releaseResources()
@@ -251,11 +240,13 @@ void RAVE_for_MIDISynthesiser_Processor::processBlock (juce::AudioBuffer<float>&
             {
                 int diff = noteNumber - rootNote;
 
-                latentVariableBias[loopStep - 1] = (static_cast<float>(diff) / 12) * 2.5;
+                latentVariableBias[loopStep - 1] = static_cast<float>(diff) / 12.0f * 2.5f;
 
                 lastNote = noteNumber;
                 waitingForRelease = true; // Next up: waiting for the off
                 sendActionMessage("NoteOn" + juce::String(latentVariableBias[loopStep - 1]) + ","  + juce::String(loopStep));
+                //std::cout << loopStep - 1 << " latentVariableBias[loopStep - 1]: " << latentVariableBias[loopStep - 1] << std::endl;
+                custom_backend.setLatentBiasPublic(loopStep - 1 , latentVariableBias[loopStep - 1]);
             }
         }
         else if (msg.isNoteOff())
@@ -295,36 +286,7 @@ void RAVE_for_MIDISynthesiser_Processor::processBlock (juce::AudioBuffer<float>&
 
     dry_wet_mixer.pushDrySamples(buffer);
 
-    // For the RAVE model, we need to process the encoder and decoder separately.
-    float* latent_space_ptrs[8];
-    for (int i = 0; i < 8; ++i) {
-        latent_space_ptrs[i] = latent_space[i];
-    }
-    m_count_input_samples += buffer.getNumSamples();
-    inference_handler_encoder.push_data(buffer.getArrayOfWritePointers(), (size_t) buffer.getNumSamples());
-    // Only pop data from the encoder when we have enough samples needed for one time step in the latent space vector (2048 samples).
-    while (m_count_input_samples >= 2048) {
-        size_t received_samples = inference_handler_encoder.pop_data(latent_space_ptrs, 1);
-        if (received_samples == 0) {
-            std::cout << "No data received from encoder!" << std::endl;
-            break;
-        } else {
-            m_count_input_samples -= 2048;
-        }
-        // Make some latent space modulation :)
-        latent_space[0][0] = latent_space[0][0] * latentVariable1ScaleParam + latentVariableBias[0];
-        latent_space[1][0] = latent_space[1][0] * latentVariable2ScaleParam + latentVariableBias[1];
-        latent_space[2][0] = latent_space[2][0] * latentVariable3ScaleParam + latentVariableBias[2];
-        latent_space[3][0] = latent_space[3][0] * latentVariable4ScaleParam + latentVariableBias[3];
-        latent_space[4][0] = latent_space[4][0] * latentVariable5ScaleParam + latentVariableBias[4];
-        latent_space[5][0] = latent_space[5][0] * latentVariable6ScaleParam + latentVariableBias[5];
-        latent_space[6][0] = latent_space[6][0] * latentVariable7ScaleParam + latentVariableBias[6];
-        latent_space[7][0] = latent_space[7][0] * latentVariable8ScaleParam + latentVariableBias[7];
-
-        inference_handler_decoder.push_data(latent_space_ptrs, received_samples);
-    }
-
-    inference_handler_decoder.pop_data(buffer.getArrayOfWritePointers(), (size_t) buffer.getNumSamples());
+    inference_handler.process(buffer.getArrayOfWritePointers(), (size_t) buffer.getNumSamples());
     
     dry_wet_mixer.mixWetSamples(buffer);
 
@@ -412,35 +374,35 @@ void RAVE_for_MIDISynthesiser_Processor::parameterChanged(const juce::String &pa
         std::cout << "ReleaseTime changed to: " << newValue << " ms" << std::endl;
     }else if (parameterID == "latentVariable1") 
     {
-        latentVariable1ScaleParam = newValue;
+        custom_backend.setLatentScalePublic(0, newValue);
         std::cout << "latentVariable1 changed to: " << newValue << std::endl;
     }else if (parameterID == "latentVariable2") 
     {
-        latentVariable2ScaleParam = newValue;
+        custom_backend.setLatentScalePublic(1, newValue);
         std::cout << "latentVariable2 changed to: " << newValue << std::endl;
     }else if (parameterID == "latentVariable3") 
     {
-        latentVariable3ScaleParam = newValue;
+        custom_backend.setLatentScalePublic(2, newValue);
         std::cout << "latentVariable3 changed to: " << newValue << std::endl;
     }else if (parameterID == "latentVariable4") 
     {
-        latentVariable4ScaleParam = newValue;
+        custom_backend.setLatentScalePublic(3, newValue);
         std::cout << "latentVariable4 changed to: " << newValue << std::endl;
     }else if (parameterID == "latentVariable5") 
     {
-        latentVariable5ScaleParam = newValue;
+        custom_backend.setLatentScalePublic(4, newValue);
         std::cout << "latentVariable5 changed to: " << newValue << std::endl;
     }else if (parameterID == "latentVariable6") 
     {
-        latentVariable6ScaleParam = newValue;
+        custom_backend.setLatentScalePublic(5, newValue);
         std::cout << "latentVariable6 changed to: " << newValue << std::endl;
     }else if (parameterID == "latentVariable7") 
     {
-        latentVariable7ScaleParam = newValue;
+        custom_backend.setLatentScalePublic(6, newValue);
         std::cout << "latentVariable7 changed to: " << newValue << std::endl;
     }else if (parameterID == "latentVariable8") 
     {
-        latentVariable8ScaleParam = newValue;
+        custom_backend.setLatentScalePublic(7, newValue);
         std::cout << "latentVariable8 changed to: " << newValue << std::endl;
     }           
 }
@@ -452,7 +414,7 @@ void RAVE_for_MIDISynthesiser_Processor::processesNonRealtime(const juce::AudioB
 }
 
 float RAVE_for_MIDISynthesiser_Processor::getLatentVariables(const int index) {
-    return latent_space[index][0];
+    return custom_backend.getEncoderOutputPublic(index);
 } 
 
 //==============================================================================

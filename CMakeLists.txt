@@ -92,7 +92,7 @@ PRODUCT_NAME ${PRODUCT_NAME}			            # The name of the final executable, w
 juce_generate_juce_header(${TARGET_NAME})
 
 # Set the model path as compile definition for the build interface
-set(RAVE_MODEL_DIR "${CMAKE_CURRENT_LIST_DIR}/models/")
+set(RAVE_MODEL_DIR "${CMAKE_CURRENT_LIST_DIR}/InitialModel/")
 
 target_compile_definitions(${TARGET_NAME}
     PUBLIC

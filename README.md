@@ -7,7 +7,7 @@ For details, please refer to the [Keyboard Operation Guide](https://github.com/y
 The source code was written with reference to the [juce-audio-plugin](https://github.com/anira-project/anira/tree/main/examples/juce-audio-plugin) included in the anira library.
 
 ## Demonstration
-[Youtube<img width="968" height="594" alt="Screenshot 2025-09-12 at 0 21 45" src="https://github.com/user-attachments/assets/13ef2e9e-ffbd-4b6c-9915-387028167876" />](https://youtu.be/ORYQNKNNJjU?si=6QDs7ne-mZo-zgeL) 
+[Youtube<img width="968" height="594" alt="Screenshot 2026-01-19 at 0 26 53" src="https://github.com/user-attachments/assets/970bc822-9339-4915-863a-82c8aad51d12" />](https://youtu.be/ORYQNKNNJjU?si=6QDs7ne-mZo-zgeL) 
 
 ## Keyboard Operation Guide
 Using a MIDI keyboard, you can sequentially control the frequency of the sine wave input to the RAVE model and the bias of eight latent variables. The first key pressed controls the frequency of the sine wave (hereafter referred to as the root note). Subsequent keys control the bias, but only function while the root note is held down. In other words, releasing the root note once starts the step where the root note is pressed again.
@@ -59,10 +59,3 @@ For training the above models, the following datasets were used:
 - [Tutorial: Build a MIDI synthesiser](https://juce.com/tutorials/tutorial_synth_using_midi_input/)
 
 - [Let's build a synthesizer plug-in with C++ and the JUCE Framework!](https://youtube.com/playlist?list=PLLgJJsrdwhPwJimt5vtHtNmu63OucmPck&si=vfKCEvMZtt56co4B)
-
-## Planned Features
-- Consider a more intuitive method of operation.
-
-- Allows you to select oscillators other than sine waves as input signals.
-
-- Provide a button that opens a file dialog and allows you to select a model.

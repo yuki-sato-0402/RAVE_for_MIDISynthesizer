@@ -5,7 +5,8 @@
 #include "RaveModelConfig.h"
 #include "CustomBackendProcessor.h"
 //==============================================================================
-class RAVE_for_MIDISynthesiser_Processor  : public juce::AudioProcessor, public juce::AudioProcessorValueTreeState::Listener, public juce::ActionBroadcaster
+class RAVE_for_MIDISynthesiser_Processor  : public juce::AudioProcessor, public juce::AudioProcessorValueTreeState::Listener, 
+public juce::ValueTree::Listener, public juce::ActionBroadcaster
 {
 public:
     //==============================================================================
@@ -44,29 +45,33 @@ public:
     void getStateInformation (juce::MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
 
-    juce::AudioProcessorValueTreeState& getValueTreeState() { return parameters; }
+    //juce::AudioProcessorValueTreeState& getValueTreeState() { return apvts; }
 
     juce::MidiMessageCollector& getMidiMessageCollector() noexcept { return midiMessageCollector; }
 
     //==============================================================================
     float getLatentVariables(const int index);
 
+    void valueTreePropertyChanged(juce::ValueTree& treeWhosePropertyHasChanged, const juce::Identifier& property) override;
+
 private:
     void parameterChanged (const juce::String& parameterID, float newValue) override;
 
     void processesNonRealtime(const juce::AudioBuffer<float>& buffer) const;
 
-    juce::AudioProcessorValueTreeState parameters;
-    juce::StringArray modelFileNames;
+    juce::AudioProcessorValueTreeState apvts;
+    juce::ValueTree valueTree;
 
     // Optional ContextConfig
     anira::ContextConfig anira_context_config;
 
+    std::unique_ptr<anira::InferenceConfig> inference_config = std::make_unique<anira::InferenceConfig>(rave_model_config);
+    std::unique_ptr<anira::PrePostProcessor> pp_processor;
+    std::unique_ptr<anira::CustomBackend> custom_backend;
+    std::unique_ptr<anira::InferenceHandler> inference_handler;
 
-    anira::InferenceConfig inference_config = rave_model_config;
-    anira::PrePostProcessor pp_processor;
-    anira::CustomBackend custom_backend;
-    anira::InferenceHandler inference_handler;
+    void updateModel(std::string newModelPath);
+
     int m_count_input_samples = 0;
 
     juce::dsp::DryWetMixer<float> dry_wet_mixer;

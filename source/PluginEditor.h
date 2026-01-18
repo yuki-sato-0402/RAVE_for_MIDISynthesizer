@@ -17,7 +17,7 @@
 class RAVE_for_MIDISynthesiser_ProcessorEditor  : public juce::AudioProcessorEditor, public juce::Slider::Listener, private juce::Timer, public juce::ActionListener
 {
 public:
-  RAVE_for_MIDISynthesiser_ProcessorEditor(RAVE_for_MIDISynthesiser_Processor& p, juce::AudioProcessorValueTreeState& vts);
+  RAVE_for_MIDISynthesiser_ProcessorEditor(RAVE_for_MIDISynthesiser_Processor& p, juce::AudioProcessorValueTreeState& apvts);
   ~RAVE_for_MIDISynthesiser_ProcessorEditor() override = default;
 
   //==============================================================================
@@ -27,6 +27,7 @@ public:
   void ADSRGraph(juce::Graphics& g);
   void timerCallback() override;
   void actionListenerCallback(const juce::String& message) override;
+  void openFileButtonClicked();
   typedef juce::AudioProcessorValueTreeState::SliderAttachment SliderAttachment;
   typedef juce::AudioProcessorValueTreeState::ComboBoxAttachment ComboBoxAttachment;
 
@@ -49,9 +50,8 @@ private:
   juce::Slider  latentVariable6Slider;
   juce::Slider  latentVariable7Slider;
   juce::Slider  latentVariable8Slider;
-  
-  //juce::ComboBox modelComboBox;
-  //juce::StringArray modelFileNames;
+
+  juce::TextButton openFileButton{ "Open Model File" };
   
   juce::Label  MixLabel;
   juce::Label  GainLabel;
@@ -59,7 +59,7 @@ private:
   juce::Label  DecayLabel;
   juce::Label  SustainLabel;
   juce::Label  ReleaseLabel;
-  //juce::Label  modelLabel;
+  
   juce::Label  ScaleLabel;
   juce::Label  latentVariable1Label;
   juce::Label  latentVariable2Label;
@@ -107,6 +107,8 @@ private:
 
   HorizontalMeter latentVariable1Meter, latentVariable2Meter, latentVariable3Meter, latentVariable4Meter,
       latentVariable5Meter, latentVariable6Meter, latentVariable7Meter, latentVariable8Meter;
+
+  std::unique_ptr<juce::FileChooser> fileChooser;
 
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RAVE_for_MIDISynthesiser_ProcessorEditor)
 };

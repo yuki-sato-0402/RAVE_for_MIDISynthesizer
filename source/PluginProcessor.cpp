@@ -7,14 +7,12 @@ RAVE_for_MIDISynthesiser_Processor::RAVE_for_MIDISynthesiser_Processor()
                        .withInput  ("Input",  juce::AudioChannelSet::mono(), true)
                        .withOutput ("Output", juce::AudioChannelSet::mono(), true)
                        ),
-        parameters(*this, nullptr, juce::Identifier("PARAMETERS"),
+        apvts(*this, nullptr, juce::Identifier("PARAMETERS"),
         juce::AudioProcessorValueTreeState::ParameterLayout {
         std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "dryWetRange",  1}, "DryWetRange",
         juce::NormalisableRange<float>(0.f, 100.f, 0.01f), 0.f),
         std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "outputGain",  1}, "OutputGain",
         juce::NormalisableRange<float>(0.f, 1.f, 0.01f), 0.5f),
-        //std::make_unique<juce::AudioParameterChoice>(juce::ParameterID{ "modelSelection", 1}, "Model Selection", 
-        //modelFileNames, 0),
         std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "attackTime",  1}, "AttackTime",
         juce::NormalisableRange<float>(1, 1000, 1), 100),
         std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "decayTime",  1}, "DecayTime",
@@ -44,44 +42,45 @@ RAVE_for_MIDISynthesiser_Processor::RAVE_for_MIDISynthesiser_Processor()
         //anira_context_config(
         //    std::thread::hardware_concurrency() / 2 > 0 ? std::thread::hardware_concurrency() / 2 : 1 // Total number of threads
         //),
-        pp_processor(inference_config),
-        custom_backend(inference_config),
-        inference_handler(pp_processor, inference_config, custom_backend),
         //In InferenceHandler.cpp, the inference_backend is set to m_inference_manager.
         dry_wet_mixer(32768) // 32768 samples of max latency compensation for the dry-wet mixer
 {
-    parameters.addParameterListener("dryWetRange", this);
-    parameters.addParameterListener("outputGain", this);
-    //parameters.addParameterListener("modelSelection", this);
-    parameters.addParameterListener("attackTime", this);
-    parameters.addParameterListener("decayTime", this);
-    parameters.addParameterListener("sustain", this);
-    parameters.addParameterListener("releaseTime", this);
-    parameters.addParameterListener("latentVariable1", this);
-    parameters.addParameterListener("latentVariable2", this);
-    parameters.addParameterListener("latentVariable3", this);
-    parameters.addParameterListener("latentVariable4", this);
-    parameters.addParameterListener("latentVariable5", this);
-    parameters.addParameterListener("latentVariable6", this);
-    parameters.addParameterListener("latentVariable7", this);
-    parameters.addParameterListener("latentVariable8", this);
+    pp_processor = std::make_unique<anira::PrePostProcessor>(*inference_config);
+    custom_backend = std::make_unique<anira::CustomBackend>(*inference_config);
+    inference_handler = std::make_unique<anira::InferenceHandler>(*pp_processor, *inference_config, *custom_backend);
 
-    dryWetRangeParam = *parameters.getRawParameterValue("dryWetRange");
-    gainParam = *parameters.getRawParameterValue("outputGain");
-    //modelIndex = static_cast<int>(*parameters.getRawParameterValue("modelSelection"));
+    apvts.addParameterListener("dryWetRange", this);
+    apvts.addParameterListener("outputGain", this);
+    apvts.state.addListener(this);// for filechooser lastFilePath
+    apvts.addParameterListener("attackTime", this);
+    apvts.addParameterListener("decayTime", this);
+    apvts.addParameterListener("sustain", this);
+    apvts.addParameterListener("releaseTime", this);
+    apvts.addParameterListener("latentVariable1", this);
+    apvts.addParameterListener("latentVariable2", this);
+    apvts.addParameterListener("latentVariable3", this);
+    apvts.addParameterListener("latentVariable4", this);
+    apvts.addParameterListener("latentVariable5", this);
+    apvts.addParameterListener("latentVariable6", this);
+    apvts.addParameterListener("latentVariable7", this);
+    apvts.addParameterListener("latentVariable8", this);
+
+    dryWetRangeParam = *apvts.getRawParameterValue("dryWetRange");
+    gainParam = *apvts.getRawParameterValue("outputGain");
+    //modelIndex = static_cast<int>(*apvts.getRawParameterValue("modelSelection"));
     //std::cout << "Initial modelIndex: " << modelIndex.size << std::endl;
-    adsrParams.attack = *parameters.getRawParameterValue("attackTime") / 1000.0f; 
-    adsrParams.decay = *parameters.getRawParameterValue("decayTime") / 1000.0f;  
-    adsrParams.sustain = *parameters.getRawParameterValue("sustain") / 100.0f;         
-    adsrParams.release = *parameters.getRawParameterValue("releaseTime") / 1000.0f; 
-    latentVariable1ScaleParam = *parameters.getRawParameterValue("latentVariable1");
-    latentVariable2ScaleParam = *parameters.getRawParameterValue("latentVariable2");
-    latentVariable3ScaleParam = *parameters.getRawParameterValue("latentVariable3");
-    latentVariable4ScaleParam = *parameters.getRawParameterValue("latentVariable4");
-    latentVariable5ScaleParam = *parameters.getRawParameterValue("latentVariable5");
-    latentVariable6ScaleParam = *parameters.getRawParameterValue("latentVariable6");
-    latentVariable7ScaleParam = *parameters.getRawParameterValue("latentVariable7");
-    latentVariable8ScaleParam = *parameters.getRawParameterValue("latentVariable8");
+    adsrParams.attack = *apvts.getRawParameterValue("attackTime") / 1000.0f; 
+    adsrParams.decay = *apvts.getRawParameterValue("decayTime") / 1000.0f;  
+    adsrParams.sustain = *apvts.getRawParameterValue("sustain") / 100.0f;         
+    adsrParams.release = *apvts.getRawParameterValue("releaseTime") / 1000.0f; 
+    latentVariable1ScaleParam = *apvts.getRawParameterValue("latentVariable1");
+    latentVariable2ScaleParam = *apvts.getRawParameterValue("latentVariable2");
+    latentVariable3ScaleParam = *apvts.getRawParameterValue("latentVariable3");
+    latentVariable4ScaleParam = *apvts.getRawParameterValue("latentVariable4");
+    latentVariable5ScaleParam = *apvts.getRawParameterValue("latentVariable5");
+    latentVariable6ScaleParam = *apvts.getRawParameterValue("latentVariable6");
+    latentVariable7ScaleParam = *apvts.getRawParameterValue("latentVariable7");
+    latentVariable8ScaleParam = *apvts.getRawParameterValue("latentVariable8");
 }
 
 
@@ -165,10 +164,9 @@ void RAVE_for_MIDISynthesiser_Processor::prepareToPlay (double sampleRate, int s
         static_cast<float>(sampleRate),
         // true // Shall smaller buffers be allowed? If true more latency
     };
-    inference_handler.prepare(host_config);
+    inference_handler->prepare(host_config);
     
-
-    int new_latency = (int) inference_handler.get_latency();
+    int new_latency = (int) inference_handler->get_latency();
 
     osc.prepare(spec);
     osc.setFrequency(440.0f);
@@ -186,7 +184,7 @@ void RAVE_for_MIDISynthesiser_Processor::prepareToPlay (double sampleRate, int s
 
 
     std::cout << "$Using CUSTOM backend for inference.$" << std::endl;
-    inference_handler.set_inference_backend(anira::InferenceBackend::CUSTOM);
+    inference_handler->set_inference_backend(anira::InferenceBackend::CUSTOM);
 }
 
 void RAVE_for_MIDISynthesiser_Processor::releaseResources()
@@ -246,7 +244,7 @@ void RAVE_for_MIDISynthesiser_Processor::processBlock (juce::AudioBuffer<float>&
                 waitingForRelease = true; // Next up: waiting for the off
                 sendActionMessage("NoteOn" + juce::String(latentVariableBias[loopStep - 1]) + ","  + juce::String(loopStep));
                 //std::cout << loopStep - 1 << " latentVariableBias[loopStep - 1]: " << latentVariableBias[loopStep - 1] << std::endl;
-                custom_backend.setLatentBiasPublic(loopStep - 1 , latentVariableBias[loopStep - 1]);
+                custom_backend->setLatentBiasPublic(loopStep - 1 , latentVariableBias[loopStep - 1]);
             }
         }
         else if (msg.isNoteOff())
@@ -282,13 +280,13 @@ void RAVE_for_MIDISynthesiser_Processor::processBlock (juce::AudioBuffer<float>&
     osc.process(juce::dsp::ProcessContextReplacing<float>(audioBlock));
     adsr.applyEnvelopeToBuffer(buffer, 0, buffer.getNumSamples());
 
-    gain.process(juce::dsp::ProcessContextReplacing<float>(audioBlock));
-
     dry_wet_mixer.pushDrySamples(buffer);
 
-    inference_handler.process(buffer.getArrayOfWritePointers(), (size_t) buffer.getNumSamples());
+    inference_handler->process(buffer.getArrayOfWritePointers(), (size_t) buffer.getNumSamples());
     
     dry_wet_mixer.mixWetSamples(buffer);
+
+    gain.process(juce::dsp::ProcessContextReplacing<float>(audioBlock));
 
     if (isNonRealtime()) {
         processesNonRealtime(buffer);
@@ -313,13 +311,13 @@ bool RAVE_for_MIDISynthesiser_Processor::hasEditor() const
 
 juce::AudioProcessorEditor* RAVE_for_MIDISynthesiser_Processor::createEditor()
 {
-    return new RAVE_for_MIDISynthesiser_ProcessorEditor (*this,  parameters);
+    return new RAVE_for_MIDISynthesiser_ProcessorEditor (*this,  apvts);
 }
 
 //==============================================================================
 void RAVE_for_MIDISynthesiser_Processor::getStateInformation (juce::MemoryBlock& destData)
 {
-    auto state = parameters.copyState();
+    auto state = apvts.copyState();
     std::unique_ptr<juce::XmlElement> xml(state.createXml());
     copyXmlToBinary(*xml, destData);
 }
@@ -328,8 +326,8 @@ void RAVE_for_MIDISynthesiser_Processor::setStateInformation (const void* data, 
 {
     std::unique_ptr<juce::XmlElement> xmlState(getXmlFromBinary(data, sizeInBytes));
     if (xmlState.get() != nullptr)
-        if (xmlState->hasTagName(parameters.state.getType()))
-            parameters.replaceState(juce::ValueTree::fromXml(*xmlState));
+        if (xmlState->hasTagName(apvts.state.getType()))
+            apvts.replaceState(juce::ValueTree::fromXml(*xmlState));
 }
 
 
@@ -344,15 +342,7 @@ void RAVE_for_MIDISynthesiser_Processor::parameterChanged(const juce::String &pa
         gainParam = newValue;
         gain.setGainLinear(gainParam);
         std::cout << "OutputGain changed to: " << newValue << std::endl;
-    }
-    //else if (parameterID == "modelSelection") 
-    //{
-    //    modelIndex = static_cast<int>(newValue);
-    //    std::string selectedFile = modelFileNames[modelIndex].toStdString();
-    //    std::cout << "ModelSelection changed to: " << selectedFile << std::endl;
-    //    inference_config = makeRaveModelConfig(selectedFile);
-    //}
-    else if (parameterID == "attackTime") 
+    }else if (parameterID == "attackTime") 
     {
         adsrParams.attack = newValue / 1000.0f;
         adsr.setParameters(adsrParams);
@@ -374,35 +364,35 @@ void RAVE_for_MIDISynthesiser_Processor::parameterChanged(const juce::String &pa
         std::cout << "ReleaseTime changed to: " << newValue << " ms" << std::endl;
     }else if (parameterID == "latentVariable1") 
     {
-        custom_backend.setLatentScalePublic(0, newValue);
+        custom_backend->setLatentScalePublic(0, newValue);
         std::cout << "latentVariable1 changed to: " << newValue << std::endl;
     }else if (parameterID == "latentVariable2") 
     {
-        custom_backend.setLatentScalePublic(1, newValue);
+        custom_backend->setLatentScalePublic(1, newValue);
         std::cout << "latentVariable2 changed to: " << newValue << std::endl;
     }else if (parameterID == "latentVariable3") 
     {
-        custom_backend.setLatentScalePublic(2, newValue);
+        custom_backend->setLatentScalePublic(2, newValue);
         std::cout << "latentVariable3 changed to: " << newValue << std::endl;
     }else if (parameterID == "latentVariable4") 
     {
-        custom_backend.setLatentScalePublic(3, newValue);
+        custom_backend->setLatentScalePublic(3, newValue);
         std::cout << "latentVariable4 changed to: " << newValue << std::endl;
     }else if (parameterID == "latentVariable5") 
     {
-        custom_backend.setLatentScalePublic(4, newValue);
+        custom_backend->setLatentScalePublic(4, newValue);
         std::cout << "latentVariable5 changed to: " << newValue << std::endl;
     }else if (parameterID == "latentVariable6") 
     {
-        custom_backend.setLatentScalePublic(5, newValue);
+        custom_backend->setLatentScalePublic(5, newValue);
         std::cout << "latentVariable6 changed to: " << newValue << std::endl;
     }else if (parameterID == "latentVariable7") 
     {
-        custom_backend.setLatentScalePublic(6, newValue);
+        custom_backend->setLatentScalePublic(6, newValue);
         std::cout << "latentVariable7 changed to: " << newValue << std::endl;
     }else if (parameterID == "latentVariable8") 
     {
-        custom_backend.setLatentScalePublic(7, newValue);
+        custom_backend->setLatentScalePublic(7, newValue);
         std::cout << "latentVariable8 changed to: " << newValue << std::endl;
     }           
 }
@@ -414,8 +404,61 @@ void RAVE_for_MIDISynthesiser_Processor::processesNonRealtime(const juce::AudioB
 }
 
 float RAVE_for_MIDISynthesiser_Processor::getLatentVariables(const int index) {
-    return custom_backend.getEncoderOutputPublic(index);
+    return custom_backend->getEncoderOutputPublic(index);
 } 
+
+void RAVE_for_MIDISynthesiser_Processor::valueTreePropertyChanged(juce::ValueTree& tree, const juce::Identifier& property)
+{
+    // Check if the "lastFilePath" property has been modified
+    if (property == juce::Identifier("lastFilePath"))
+    {
+        std::string currentFilePath = tree.getProperty(property).toString().toStdString();
+        std::cout << "ValueTree Property Changed - lastFilePath: " << currentFilePath << std::endl;
+        
+        updateModel(currentFilePath);
+    }
+}
+
+void RAVE_for_MIDISynthesiser_Processor::updateModel(std::string newModelPath){
+    juce::AudioProcessor::suspendProcessing(true);
+    inference_handler.reset();
+    pp_processor.reset();
+    custom_backend.reset();
+    inference_config.reset();
+
+    std::vector<anira::ModelData> newModelData = {
+        {newModelPath, anira::InferenceBackend::CUSTOM}
+    };
+    
+    inference_config = std::make_unique<anira::InferenceConfig>(
+        newModelData,
+        tensorShape,    
+        processingSpec,
+        200.00f,
+        5,
+        false
+    );
+
+    custom_backend = std::make_unique<anira::CustomBackend>(*inference_config);
+    pp_processor = std::make_unique<anira::PrePostProcessor>(*inference_config);
+    
+    // Assigning to the member variable inference_config causes it to remain in memory even after the function terminates.
+    inference_handler = std::make_unique<anira::InferenceHandler>(
+        *pp_processor, *inference_config, *custom_backend
+    );
+
+    anira::HostConfig host_config {
+        static_cast<float>(getBlockSize()),
+        static_cast<float>(getSampleRate())
+    };
+    inference_handler->prepare(host_config);
+    int new_latency = (int) inference_handler->get_latency();
+    setLatencySamples(new_latency);
+    dry_wet_mixer.setWetLatency((float) new_latency);
+    inference_handler->set_inference_backend(anira::InferenceBackend::CUSTOM);
+
+    juce::AudioProcessor::suspendProcessing(false);
+}
 
 //==============================================================================
 // This creates new instances of the plugin..

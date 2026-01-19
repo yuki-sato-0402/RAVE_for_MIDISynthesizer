@@ -2,7 +2,7 @@
 #include "PluginEditor.h"
 
 //==============================================================================
-RAVE_for_MIDISynthesiser_Processor::RAVE_for_MIDISynthesiser_Processor() 
+RAVE_for_MIDISynthesizer_Processor::RAVE_for_MIDISynthesizer_Processor() 
         : AudioProcessor (BusesProperties()
                        .withInput  ("Input",  juce::AudioChannelSet::mono(), true)
                        .withOutput ("Output", juce::AudioChannelSet::mono(), true)
@@ -85,12 +85,12 @@ RAVE_for_MIDISynthesiser_Processor::RAVE_for_MIDISynthesiser_Processor()
 
 
 //==============================================================================
-const juce::String RAVE_for_MIDISynthesiser_Processor::getName() const
+const juce::String RAVE_for_MIDISynthesizer_Processor::getName() const
 {
     return JucePlugin_Name;
 }
 
-bool RAVE_for_MIDISynthesiser_Processor::acceptsMidi() const
+bool RAVE_for_MIDISynthesizer_Processor::acceptsMidi() const
 {
    #if JucePlugin_WantsMidiInput
     return true;
@@ -99,7 +99,7 @@ bool RAVE_for_MIDISynthesiser_Processor::acceptsMidi() const
    #endif
 }
 
-bool RAVE_for_MIDISynthesiser_Processor::producesMidi() const
+bool RAVE_for_MIDISynthesizer_Processor::producesMidi() const
 {
    #if JucePlugin_ProducesMidiOutput
     return true;
@@ -108,7 +108,7 @@ bool RAVE_for_MIDISynthesiser_Processor::producesMidi() const
    #endif
 }
 
-bool RAVE_for_MIDISynthesiser_Processor::isMidiEffect() const
+bool RAVE_for_MIDISynthesizer_Processor::isMidiEffect() const
 {
    #if JucePlugin_IsMidiEffect
     return true;
@@ -117,40 +117,40 @@ bool RAVE_for_MIDISynthesiser_Processor::isMidiEffect() const
    #endif
 }
 
-double RAVE_for_MIDISynthesiser_Processor::getTailLengthSeconds() const
+double RAVE_for_MIDISynthesizer_Processor::getTailLengthSeconds() const
 {
     return 0.0;
 }
 
-int RAVE_for_MIDISynthesiser_Processor::getNumPrograms()
+int RAVE_for_MIDISynthesizer_Processor::getNumPrograms()
 {
     return 1;   // NB: some hosts don't cope very well if you tell them there are 0 programs,
                 // so this should be at least 1, even if you're not really implementing programs.
 }
 
-int RAVE_for_MIDISynthesiser_Processor::getCurrentProgram()
+int RAVE_for_MIDISynthesizer_Processor::getCurrentProgram()
 {
     return 0;
 }
 
-void RAVE_for_MIDISynthesiser_Processor::setCurrentProgram (int index)
+void RAVE_for_MIDISynthesizer_Processor::setCurrentProgram (int index)
 {
     juce::ignoreUnused (index);
 }
 
-const juce::String RAVE_for_MIDISynthesiser_Processor::getProgramName (int index)
+const juce::String RAVE_for_MIDISynthesizer_Processor::getProgramName (int index)
 {
     juce::ignoreUnused (index);
     return {};
 }
 
-void RAVE_for_MIDISynthesiser_Processor::changeProgramName (int index, const juce::String& newName)
+void RAVE_for_MIDISynthesizer_Processor::changeProgramName (int index, const juce::String& newName)
 {
     juce::ignoreUnused (index, newName);
 }
 
 //==============================================================================
-void RAVE_for_MIDISynthesiser_Processor::prepareToPlay (double sampleRate, int samplesPerBlock)
+void RAVE_for_MIDISynthesizer_Processor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
     mutedSamples = sampleRate * 2;
     totalSamplesProcessed = 0;
@@ -187,13 +187,13 @@ void RAVE_for_MIDISynthesiser_Processor::prepareToPlay (double sampleRate, int s
     inference_handler->set_inference_backend(anira::InferenceBackend::CUSTOM);
 }
 
-void RAVE_for_MIDISynthesiser_Processor::releaseResources()
+void RAVE_for_MIDISynthesizer_Processor::releaseResources()
 {
     // When playback stops, you can use this as an opportunity to free up any
     // spare memory, etc.
 }
 
-bool RAVE_for_MIDISynthesiser_Processor::isBusesLayoutSupported (const BusesLayout& layouts) const
+bool RAVE_for_MIDISynthesizer_Processor::isBusesLayoutSupported (const BusesLayout& layouts) const
 {
     if (layouts.getMainInputChannelSet() != layouts.getMainOutputChannelSet())
         return false;
@@ -204,7 +204,7 @@ bool RAVE_for_MIDISynthesiser_Processor::isBusesLayoutSupported (const BusesLayo
         return true;
 }
 
-void RAVE_for_MIDISynthesiser_Processor::processBlock (juce::AudioBuffer<float>& buffer,
+void RAVE_for_MIDISynthesizer_Processor::processBlock (juce::AudioBuffer<float>& buffer,
                                               juce::MidiBuffer& midiMessages)
 {
     juce::ScopedNoDenormals noDenormals;
@@ -304,25 +304,25 @@ void RAVE_for_MIDISynthesiser_Processor::processBlock (juce::AudioBuffer<float>&
 }
 
 //==============================================================================
-bool RAVE_for_MIDISynthesiser_Processor::hasEditor() const
+bool RAVE_for_MIDISynthesizer_Processor::hasEditor() const
 {
     return true; // (change this to false if you choose to not supply an editor)
 }
 
-juce::AudioProcessorEditor* RAVE_for_MIDISynthesiser_Processor::createEditor()
+juce::AudioProcessorEditor* RAVE_for_MIDISynthesizer_Processor::createEditor()
 {
-    return new RAVE_for_MIDISynthesiser_ProcessorEditor (*this,  apvts);
+    return new RAVE_for_MIDISynthesizer_ProcessorEditor (*this,  apvts);
 }
 
 //==============================================================================
-void RAVE_for_MIDISynthesiser_Processor::getStateInformation (juce::MemoryBlock& destData)
+void RAVE_for_MIDISynthesizer_Processor::getStateInformation (juce::MemoryBlock& destData)
 {
     auto state = apvts.copyState();
     std::unique_ptr<juce::XmlElement> xml(state.createXml());
     copyXmlToBinary(*xml, destData);
 }
 
-void RAVE_for_MIDISynthesiser_Processor::setStateInformation (const void* data, int sizeInBytes)
+void RAVE_for_MIDISynthesizer_Processor::setStateInformation (const void* data, int sizeInBytes)
 {
     std::unique_ptr<juce::XmlElement> xmlState(getXmlFromBinary(data, sizeInBytes));
     if (xmlState.get() != nullptr)
@@ -331,7 +331,7 @@ void RAVE_for_MIDISynthesiser_Processor::setStateInformation (const void* data, 
 }
 
 
-void RAVE_for_MIDISynthesiser_Processor::parameterChanged(const juce::String &parameterID, float newValue) {
+void RAVE_for_MIDISynthesizer_Processor::parameterChanged(const juce::String &parameterID, float newValue) {
     if (parameterID == "dryWetRange") 
     {
         dryWetRangeParam = newValue;
@@ -397,17 +397,17 @@ void RAVE_for_MIDISynthesiser_Processor::parameterChanged(const juce::String &pa
     }           
 }
 
-void RAVE_for_MIDISynthesiser_Processor::processesNonRealtime(const juce::AudioBuffer<float>& buffer) const {
+void RAVE_for_MIDISynthesizer_Processor::processesNonRealtime(const juce::AudioBuffer<float>& buffer) const {
     double durationInSeconds = static_cast<double>(buffer.getNumSamples()) / getSampleRate();
     auto durationInMilliseconds = std::chrono::duration<double, std::milli>(durationInSeconds * 1000);
     std::this_thread::sleep_for(durationInMilliseconds);
 }
 
-float RAVE_for_MIDISynthesiser_Processor::getLatentVariables(const int index) {
+float RAVE_for_MIDISynthesizer_Processor::getLatentVariables(const int index) {
     return custom_backend->getEncoderOutputPublic(index);
 } 
 
-void RAVE_for_MIDISynthesiser_Processor::valueTreePropertyChanged(juce::ValueTree& tree, const juce::Identifier& property)
+void RAVE_for_MIDISynthesizer_Processor::valueTreePropertyChanged(juce::ValueTree& tree, const juce::Identifier& property)
 {
     // Check if the "lastFilePath" property has been modified
     if (property == juce::Identifier("lastFilePath"))
@@ -419,7 +419,7 @@ void RAVE_for_MIDISynthesiser_Processor::valueTreePropertyChanged(juce::ValueTre
     }
 }
 
-void RAVE_for_MIDISynthesiser_Processor::updateModel(std::string newModelPath){
+void RAVE_for_MIDISynthesizer_Processor::updateModel(std::string newModelPath){
     juce::AudioProcessor::suspendProcessing(true);
     inference_handler.reset();
     pp_processor.reset();
@@ -464,5 +464,5 @@ void RAVE_for_MIDISynthesiser_Processor::updateModel(std::string newModelPath){
 // This creates new instances of the plugin..
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 {
-    return new RAVE_for_MIDISynthesiser_Processor();
+    return new RAVE_for_MIDISynthesizer_Processor();
 }

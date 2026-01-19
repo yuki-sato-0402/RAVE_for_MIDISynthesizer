@@ -8,7 +8,7 @@
 #include "PluginEditor.h"
 #include "PluginProcessor.h"
 
-RAVE_for_MIDISynthesiser_ProcessorEditor::RAVE_for_MIDISynthesiser_ProcessorEditor(RAVE_for_MIDISynthesiser_Processor& p, juce::AudioProcessorValueTreeState& apvts)
+RAVE_for_MIDISynthesizer_ProcessorEditor::RAVE_for_MIDISynthesizer_ProcessorEditor(RAVE_for_MIDISynthesizer_Processor& p, juce::AudioProcessorValueTreeState& apvts)
     : AudioProcessorEditor (&p),processorRef (p),  valueTreeState(apvts)
 {
   MixSliderAttachment.reset (new SliderAttachment (valueTreeState, "dryWetRange", MixSlider));
@@ -312,13 +312,13 @@ RAVE_for_MIDISynthesiser_ProcessorEditor::RAVE_for_MIDISynthesiser_ProcessorEdit
   setSize(920, 520);
 }
 
-void RAVE_for_MIDISynthesiser_ProcessorEditor::paint (juce::Graphics& g)
+void RAVE_for_MIDISynthesizer_ProcessorEditor::paint (juce::Graphics& g)
 {
   g.fillAll(juce::Colours::greenyellow.darker(0.25));
   ADSRGraph(g);
 }
 
-void RAVE_for_MIDISynthesiser_ProcessorEditor::resized()
+void RAVE_for_MIDISynthesizer_ProcessorEditor::resized()
 {
 
   auto area = getLocalBounds();
@@ -403,13 +403,13 @@ void RAVE_for_MIDISynthesiser_ProcessorEditor::resized()
 
 }
 
-void RAVE_for_MIDISynthesiser_ProcessorEditor::sliderValueChanged(juce::Slider* slider)
+void RAVE_for_MIDISynthesizer_ProcessorEditor::sliderValueChanged(juce::Slider* slider)
 {
     juce::ignoreUnused(slider);
     repaint();
 }
 
-void RAVE_for_MIDISynthesiser_ProcessorEditor::ADSRGraph(juce::Graphics& g)
+void RAVE_for_MIDISynthesizer_ProcessorEditor::ADSRGraph(juce::Graphics& g)
 {
   float attack  = static_cast<float>(AttackSlider.getValue()); 
   float decay   = static_cast<float>(DecaySlider.getValue());
@@ -444,7 +444,7 @@ void RAVE_for_MIDISynthesiser_ProcessorEditor::ADSRGraph(juce::Graphics& g)
 
 
 
-void RAVE_for_MIDISynthesiser_ProcessorEditor::timerCallback()
+void RAVE_for_MIDISynthesizer_ProcessorEditor::timerCallback()
 {
   latentVariable1Meter.setValue(processorRef.getLatentVariables(0));
   latentVariable2Meter.setValue(processorRef.getLatentVariables(1)); 
@@ -456,7 +456,7 @@ void RAVE_for_MIDISynthesiser_ProcessorEditor::timerCallback()
   latentVariable8Meter.setValue(processorRef.getLatentVariables(7));
 }
 
-void RAVE_for_MIDISynthesiser_ProcessorEditor::actionListenerCallback(const juce::String& message)
+void RAVE_for_MIDISynthesizer_ProcessorEditor::actionListenerCallback(const juce::String& message)
 {
   if (message.startsWith("NoteOn"))
   {
@@ -532,12 +532,12 @@ void RAVE_for_MIDISynthesiser_ProcessorEditor::actionListenerCallback(const juce
   }
 }
 
-void RAVE_for_MIDISynthesiser_ProcessorEditor::updateBiasLabel(juce::Label& label)
+void RAVE_for_MIDISynthesizer_ProcessorEditor::updateBiasLabel(juce::Label& label)
 {
     label.setColour(juce::Label::backgroundColourId, juce::Colours::white.withAlpha(0.f));
 }
 
-void RAVE_for_MIDISynthesiser_ProcessorEditor::openFileButtonClicked()
+void RAVE_for_MIDISynthesizer_ProcessorEditor::openFileButtonClicked()
 {
     fileChooser = std::make_unique<juce::FileChooser> (
         "Select a file to load...",

@@ -10,7 +10,7 @@ option(NNITEMPLATE_WITH_INSTALL "Add install targets" ON)
 # Setup the project
 # ==============================================================================
 
-set (PROJECT_NAME RAVE_for_MIDISynthesiser)
+set (PROJECT_NAME RAVE_for_MIDISynthesizer)
 
 project (${PROJECT_NAME} VERSION 0.0.4)
 
@@ -59,7 +59,7 @@ set(FORMATS_TO_BUILD VST3 Standalone)
 endif()
 
 set(TARGET_NAME RAVE_FOR_MIDISYNTHESIZER)
-set(PRODUCT_NAME "RAVE_for_MIDISynthesiser")
+set(PRODUCT_NAME "RAVE_for_MIDISynthesizer")
 
 juce_add_plugin(${TARGET_NAME}
 # VERSION ...                               # Set this if the plugin version is different to the project version

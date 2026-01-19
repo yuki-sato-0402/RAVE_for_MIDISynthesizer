@@ -20,7 +20,7 @@ In addition to the bias, you can also use the dial to scale (multiply) the laten
 
 ## 🛠️ Build Instructions
 ```
-cd RAVE_for_MIDISynthesiser
+cd RAVE_for_MIDISynthesizer
 git submodule update --init --recursive
 cd build
 cmake ..

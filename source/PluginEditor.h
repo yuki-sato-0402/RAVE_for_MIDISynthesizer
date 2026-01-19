@@ -14,11 +14,11 @@
   ==============================================================================
 */
 
-class RAVE_for_MIDISynthesiser_ProcessorEditor  : public juce::AudioProcessorEditor, public juce::Slider::Listener, private juce::Timer, public juce::ActionListener
+class RAVE_for_MIDISynthesizer_ProcessorEditor  : public juce::AudioProcessorEditor, public juce::Slider::Listener, private juce::Timer, public juce::ActionListener
 {
 public:
-  RAVE_for_MIDISynthesiser_ProcessorEditor(RAVE_for_MIDISynthesiser_Processor& p, juce::AudioProcessorValueTreeState& apvts);
-  ~RAVE_for_MIDISynthesiser_ProcessorEditor() override = default;
+  RAVE_for_MIDISynthesizer_ProcessorEditor(RAVE_for_MIDISynthesizer_Processor& p, juce::AudioProcessorValueTreeState& apvts);
+  ~RAVE_for_MIDISynthesizer_ProcessorEditor() override = default;
 
   //==============================================================================
   void paint (juce::Graphics& g) override;
@@ -34,7 +34,7 @@ public:
   std::string selectedFileName;
 
 private:
-  RAVE_for_MIDISynthesiser_Processor& processorRef;
+  RAVE_for_MIDISynthesizer_Processor& processorRef;
   juce::AudioProcessorValueTreeState& valueTreeState;
   juce::Slider MixSlider;
   juce::Slider GainSlider;
@@ -110,6 +110,6 @@ private:
 
   std::unique_ptr<juce::FileChooser> fileChooser;
 
-  JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RAVE_for_MIDISynthesiser_ProcessorEditor)
+  JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RAVE_for_MIDISynthesizer_ProcessorEditor)
 };
 #endif //NN_INFERENCE_TEMPLATE_PLUGINPARAMETERS_H

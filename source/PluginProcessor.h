@@ -5,13 +5,13 @@
 #include "RaveModelConfig.h"
 #include "CustomBackendProcessor.h"
 //==============================================================================
-class RAVE_for_MIDISynthesiser_Processor  : public juce::AudioProcessor, public juce::AudioProcessorValueTreeState::Listener, 
+class RAVE_for_MIDISynthesizer_Processor  : public juce::AudioProcessor, public juce::AudioProcessorValueTreeState::Listener, 
 public juce::ValueTree::Listener, public juce::ActionBroadcaster
 {
 public:
     //==============================================================================
-    RAVE_for_MIDISynthesiser_Processor();
-    ~RAVE_for_MIDISynthesiser_Processor() override = default;
+    RAVE_for_MIDISynthesizer_Processor();
+    ~RAVE_for_MIDISynthesizer_Processor() override = default;
 
     //==============================================================================
     void prepareToPlay (double sampleRate, int samplesPerBlock) override;
@@ -113,5 +113,5 @@ private:
     juce::MidiMessageCollector midiMessageCollector;
     
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RAVE_for_MIDISynthesiser_Processor)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RAVE_for_MIDISynthesizer_Processor)
 };

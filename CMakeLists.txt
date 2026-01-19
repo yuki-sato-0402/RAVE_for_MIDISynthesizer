@@ -71,7 +71,7 @@ NEEDS_MIDI_INPUT TRUE              # Does the plugin need midi input?
 # NEEDS_MIDI_OUTPUT TRUE/FALSE              # Does the plugin need midi output?
 # IS_MIDI_EFFECT TRUE/FALSE                 # Is this plugin a MIDI effect?
 EDITOR_WANTS_KEYBOARD_FOCUS TRUE  # Does the editor need keyboard focus?
-COPY_PLUGIN_AFTER_BUILD TRUE       # Should the plugin be installed to a default location after building?
+COPY_PLUGIN_AFTER_BUILD FALSE       # Should the plugin be installed to a default location after building?
 PLUGIN_MANUFACTURER_CODE AcSc              # A four-character manufacturer id with at least one upper-case character
 PLUGIN_CODE Nnit                            # A unique four-character plugin id with exactly one upper-case character
 # GarageBand 10.3 requires the first letter to be upper-case, and the remaining letters to be lower-case
@@ -98,6 +98,14 @@ target_compile_definitions(${TARGET_NAME}
     PUBLIC
     RAVE_MODEL_DIR="${RAVE_MODEL_DIR}"
 )
+
+# Embed model into the binary using JUCE's binary data helper.
+# This creates a small target that is linked into each plugin/app so the
+# model file is available inside the executable. Adjust if you add more models.
+set(RAVE_MODEL_SRC "${CMAKE_CURRENT_LIST_DIR}/InitialModel/altoSaxV1_e02d7ebfe3_streaming_norm.ts")
+juce_add_binary_data(RaveModelBinaryData SOURCES ${RAVE_MODEL_SRC})
+target_link_libraries(${TARGET_NAME} PRIVATE RaveModelBinaryData)
+target_compile_definitions(${TARGET_NAME} PRIVATE USE_EMBEDDED_MODEL)
 
 # Add all source files to file list
 file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/source/*.cpp ${CMAKE_CURRENT_SOURCE_DIR}/source/*.h)

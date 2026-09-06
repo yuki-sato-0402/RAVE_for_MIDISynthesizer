@@ -60,6 +60,7 @@ private:
   juce::Label  SustainLabel;
   juce::Label  ReleaseLabel;
   
+  juce::Label  LatentVariableLabel;
   juce::Label  ScaleLabel;
   juce::Label  latentVariable1Label;
   juce::Label  latentVariable2Label;
@@ -71,17 +72,14 @@ private:
   juce::Label  latentVariable8Label;
 
   juce::Label  BiasLabel;
-  juce::Label  latentVariable1BiasLabel;
-  juce::Label  latentVariable2BiasLabel;
-  juce::Label  latentVariable3BiasLabel;
-  juce::Label  latentVariable4BiasLabel;
-  juce::Label  latentVariable5BiasLabel;
-  juce::Label  latentVariable6BiasLabel;
-  juce::Label  latentVariable7BiasLabel;
-  juce::Label  latentVariable8BiasLabel;
-  void updateBiasLabel(juce::Label& label);
-  float bias = 0;
-  juce::Label* previousBias = nullptr;  
+  juce::Slider latentVariable1BiasSlider;
+  juce::Slider latentVariable2BiasSlider;
+  juce::Slider latentVariable3BiasSlider;
+  juce::Slider latentVariable4BiasSlider;
+  juce::Slider latentVariable5BiasSlider;
+  juce::Slider latentVariable6BiasSlider;
+  juce::Slider latentVariable7BiasSlider;
+  juce::Slider latentVariable8BiasSlider;
 
   std::unique_ptr<SliderAttachment> MixSliderAttachment;
   std::unique_ptr<SliderAttachment> GainSliderAttachment;
@@ -97,6 +95,15 @@ private:
   std::unique_ptr<SliderAttachment> latentVariable6SliderAttachment;
   std::unique_ptr<SliderAttachment> latentVariable7SliderAttachment;
   std::unique_ptr<SliderAttachment> latentVariable8SliderAttachment;
+
+  std::unique_ptr<SliderAttachment> latentVariable1BiasSliderAttachment;
+  std::unique_ptr<SliderAttachment> latentVariable2BiasSliderAttachment;
+  std::unique_ptr<SliderAttachment> latentVariable3BiasSliderAttachment;
+  std::unique_ptr<SliderAttachment> latentVariable4BiasSliderAttachment;
+  std::unique_ptr<SliderAttachment> latentVariable5BiasSliderAttachment;
+  std::unique_ptr<SliderAttachment> latentVariable6BiasSliderAttachment;
+  std::unique_ptr<SliderAttachment> latentVariable7BiasSliderAttachment;
+  std::unique_ptr<SliderAttachment> latentVariable8BiasSliderAttachment;
 
   //std::unique_ptr<ComboBoxAttachment> comboBoxAttachment;
 

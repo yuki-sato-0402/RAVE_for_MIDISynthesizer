@@ -88,14 +88,8 @@ private:
     int modelIndex;
 
     //midi control
-    int rootNote = -1;         // First Notes
-    size_t loopStep = 0;          // Current step position (0..8)
-    int lastNote = -1;         // Previous notes
-    bool noteActive = false;   // Is the first one on?
-    bool waitingForRelease = false; // To proceed, wait for the off signal.
-
-    float latent_space[8][1];
-    float latentVariableBias[8] = { 0 }; 
+    int lastNoteNumber = -1;
+    bool noteActive = false;
 
     float latentVariable1ScaleParam = 0.0f;
     float latentVariable2ScaleParam = 0.0f;
@@ -105,6 +99,15 @@ private:
     float latentVariable6ScaleParam = 0.0f;
     float latentVariable7ScaleParam = 0.0f;
     float latentVariable8ScaleParam = 0.0f;
+
+    float latentVariable1BiasParam = 0.0f;
+    float latentVariable2BiasParam = 0.0f;
+    float latentVariable3BiasParam = 0.0f;
+    float latentVariable4BiasParam = 0.0f;
+    float latentVariable5BiasParam = 0.0f;
+    float latentVariable6BiasParam = 0.0f;
+    float latentVariable7BiasParam = 0.0f;
+    float latentVariable8BiasParam = 0.0f;
 
 
     double mutedSamples = 0;

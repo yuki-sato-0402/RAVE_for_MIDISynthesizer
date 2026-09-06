@@ -36,7 +36,23 @@ RAVE_for_MIDISynthesizer_Processor::RAVE_for_MIDISynthesizer_Processor()
         std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "latentVariable7",  1}, "latentVariable7",
         juce::NormalisableRange<float>(-1.0f, 1.0f, 0.01f), 1.0f),
         std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "latentVariable8",  1}, "latentVariable8",
-        juce::NormalisableRange<float>(-1.0f, 1.0f, 0.01f), 1.0f),    
+        juce::NormalisableRange<float>(-1.0f, 1.0f, 0.01f), 1.0f),
+        std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "latentVariable1Bias",  1}, "latentVariable1Bias",
+        juce::NormalisableRange<float>(-2.5f, 2.5f, 0.01f), 0.0f),
+        std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "latentVariable2Bias",  1}, "latentVariable2Bias",
+        juce::NormalisableRange<float>(-2.5f, 2.5f, 0.01f), 0.0f),
+        std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "latentVariable3Bias",  1}, "latentVariable3Bias",
+        juce::NormalisableRange<float>(-2.5f, 2.5f, 0.01f), 0.0f),
+        std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "latentVariable4Bias",  1}, "latentVariable4Bias",
+        juce::NormalisableRange<float>(-2.5f, 2.5f, 0.01f), 0.0f),
+        std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "latentVariable5Bias",  1}, "latentVariable5Bias",
+        juce::NormalisableRange<float>(-2.5f, 2.5f, 0.01f), 0.0f),
+        std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "latentVariable6Bias",  1}, "latentVariable6Bias",
+        juce::NormalisableRange<float>(-2.5f, 2.5f, 0.01f), 0.0f),
+        std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "latentVariable7Bias",  1}, "latentVariable7Bias",
+        juce::NormalisableRange<float>(-2.5f, 2.5f, 0.01f), 0.0f),
+        std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "latentVariable8Bias",  1}, "latentVariable8Bias",
+        juce::NormalisableRange<float>(-2.5f, 2.5f, 0.01f), 0.0f),
         }
         ),
         //anira_context_config(
@@ -64,6 +80,14 @@ RAVE_for_MIDISynthesizer_Processor::RAVE_for_MIDISynthesizer_Processor()
     apvts.addParameterListener("latentVariable6", this);
     apvts.addParameterListener("latentVariable7", this);
     apvts.addParameterListener("latentVariable8", this);
+    apvts.addParameterListener("latentVariable1Bias", this);
+    apvts.addParameterListener("latentVariable2Bias", this);
+    apvts.addParameterListener("latentVariable3Bias", this);
+    apvts.addParameterListener("latentVariable4Bias", this);
+    apvts.addParameterListener("latentVariable5Bias", this);
+    apvts.addParameterListener("latentVariable6Bias", this);
+    apvts.addParameterListener("latentVariable7Bias", this);
+    apvts.addParameterListener("latentVariable8Bias", this);
 
     dryWetRangeParam = *apvts.getRawParameterValue("dryWetRange");
     gainParam = *apvts.getRawParameterValue("outputGain");
@@ -81,6 +105,33 @@ RAVE_for_MIDISynthesizer_Processor::RAVE_for_MIDISynthesizer_Processor()
     latentVariable6ScaleParam = *apvts.getRawParameterValue("latentVariable6");
     latentVariable7ScaleParam = *apvts.getRawParameterValue("latentVariable7");
     latentVariable8ScaleParam = *apvts.getRawParameterValue("latentVariable8");
+
+    latentVariable1BiasParam = *apvts.getRawParameterValue("latentVariable1Bias");
+    latentVariable2BiasParam = *apvts.getRawParameterValue("latentVariable2Bias");
+    latentVariable3BiasParam = *apvts.getRawParameterValue("latentVariable3Bias");
+    latentVariable4BiasParam = *apvts.getRawParameterValue("latentVariable4Bias");
+    latentVariable5BiasParam = *apvts.getRawParameterValue("latentVariable5Bias");
+    latentVariable6BiasParam = *apvts.getRawParameterValue("latentVariable6Bias");
+    latentVariable7BiasParam = *apvts.getRawParameterValue("latentVariable7Bias");
+    latentVariable8BiasParam = *apvts.getRawParameterValue("latentVariable8Bias");
+
+    custom_backend->setLatentScalePublic(0, latentVariable1ScaleParam);
+    custom_backend->setLatentScalePublic(1, latentVariable2ScaleParam);
+    custom_backend->setLatentScalePublic(2, latentVariable3ScaleParam);
+    custom_backend->setLatentScalePublic(3, latentVariable4ScaleParam);
+    custom_backend->setLatentScalePublic(4, latentVariable5ScaleParam);
+    custom_backend->setLatentScalePublic(5, latentVariable6ScaleParam);
+    custom_backend->setLatentScalePublic(6, latentVariable7ScaleParam);
+    custom_backend->setLatentScalePublic(7, latentVariable8ScaleParam);
+
+    custom_backend->setLatentBiasPublic(0, latentVariable1BiasParam);
+    custom_backend->setLatentBiasPublic(1, latentVariable2BiasParam);
+    custom_backend->setLatentBiasPublic(2, latentVariable3BiasParam);
+    custom_backend->setLatentBiasPublic(3, latentVariable4BiasParam);
+    custom_backend->setLatentBiasPublic(4, latentVariable5BiasParam);
+    custom_backend->setLatentBiasPublic(5, latentVariable6BiasParam);
+    custom_backend->setLatentBiasPublic(6, latentVariable7BiasParam);
+    custom_backend->setLatentBiasPublic(7, latentVariable8BiasParam);
 }
 
 
@@ -218,58 +269,19 @@ void RAVE_for_MIDISynthesizer_Processor::processBlock (juce::AudioBuffer<float>&
         if (msg.isNoteOn())
         {
             int noteNumber = msg.getNoteNumber();
-
-            // === First Note-On ===
-            if (!noteActive && loopStep == 0)
-            {
-                rootNote = noteNumber;
-                double freq = juce::MidiMessage::getMidiNoteInHertz(rootNote);
-                osc.setFrequency(static_cast<float>(freq));
-                adsr.noteOn();
-
-                noteActive = true;
-                loopStep = 1; 
-                lastNote = rootNote;
-
-                //std::cout << "Root Note On: " << rootNote << std::endl;
-            }
-            // === Second to Ninth Time ===
-            else if (noteActive && loopStep > 0 && loopStep <= 8 && !waitingForRelease)
-            {
-                int diff = noteNumber - rootNote;
-
-                latentVariableBias[loopStep - 1] = static_cast<float>(diff) / 12.0f * 2.5f;
-
-                lastNote = noteNumber;
-                waitingForRelease = true; // Next up: waiting for the off
-                sendActionMessage("NoteOn" + juce::String(latentVariableBias[loopStep - 1]) + ","  + juce::String(loopStep));
-                //std::cout << loopStep - 1 << " latentVariableBias[loopStep - 1]: " << latentVariableBias[loopStep - 1] << std::endl;
-                custom_backend->setLatentBiasPublic(loopStep - 1 , latentVariableBias[loopStep - 1]);
-            }
+            lastNoteNumber = noteNumber;
+            double freq = juce::MidiMessage::getMidiNoteInHertz(noteNumber);
+            osc.setFrequency(static_cast<float>(freq));
+            adsr.noteOn();
+            noteActive = true;
         }
         else if (msg.isNoteOff())
         {
             int noteNumber = msg.getNoteNumber();
-
-            // Reset when the first one turns off
-            if (noteActive && noteNumber == rootNote)
+            if (noteActive && noteNumber == lastNoteNumber)
             {
                 noteActive = false;
-                loopStep = 0;
-                sendActionMessage("RootNoteOff");
                 adsr.noteOff();
-            }
-            // Progression Rule: Once the previous note is off, proceed to the next step.
-            else if (waitingForRelease && noteNumber == lastNote)
-            {
-                waitingForRelease = false;
-                loopStep++;
-
-                if (loopStep > 8) 
-                {
-                    loopStep = 1; // Starting from the second time
-                    std::cout << "Loop Completed -> Restart" << std::endl;
-                }
             }
         }
     }
@@ -394,6 +406,46 @@ void RAVE_for_MIDISynthesizer_Processor::parameterChanged(const juce::String &pa
     {
         custom_backend->setLatentScalePublic(7, newValue);
         std::cout << "latentVariable8 changed to: " << newValue << std::endl;
+    }else if (parameterID == "latentVariable1Bias") 
+    {
+        latentVariable1BiasParam = newValue;
+        custom_backend->setLatentBiasPublic(0, newValue);
+        std::cout << "latentVariable1Bias changed to: " << newValue << std::endl;
+    }else if (parameterID == "latentVariable2Bias") 
+    {
+        latentVariable2BiasParam = newValue;
+        custom_backend->setLatentBiasPublic(1, newValue);
+        std::cout << "latentVariable2Bias changed to: " << newValue << std::endl;
+    }else if (parameterID == "latentVariable3Bias") 
+    {
+        latentVariable3BiasParam = newValue;
+        custom_backend->setLatentBiasPublic(2, newValue);
+        std::cout << "latentVariable3Bias changed to: " << newValue << std::endl;
+    }else if (parameterID == "latentVariable4Bias") 
+    {
+        latentVariable4BiasParam = newValue;
+        custom_backend->setLatentBiasPublic(3, newValue);
+        std::cout << "latentVariable4Bias changed to: " << newValue << std::endl;
+    }else if (parameterID == "latentVariable5Bias") 
+    {
+        latentVariable5BiasParam = newValue;
+        custom_backend->setLatentBiasPublic(4, newValue);
+        std::cout << "latentVariable5Bias changed to: " << newValue << std::endl;
+    }else if (parameterID == "latentVariable6Bias") 
+    {
+        latentVariable6BiasParam = newValue;
+        custom_backend->setLatentBiasPublic(5, newValue);
+        std::cout << "latentVariable6Bias changed to: " << newValue << std::endl;
+    }else if (parameterID == "latentVariable7Bias") 
+    {
+        latentVariable7BiasParam = newValue;
+        custom_backend->setLatentBiasPublic(6, newValue);
+        std::cout << "latentVariable7Bias changed to: " << newValue << std::endl;
+    }else if (parameterID == "latentVariable8Bias") 
+    {
+        latentVariable8BiasParam = newValue;
+        custom_backend->setLatentBiasPublic(7, newValue);
+        std::cout << "latentVariable8Bias changed to: " << newValue << std::endl;
     }           
 }
 
@@ -456,6 +508,13 @@ void RAVE_for_MIDISynthesizer_Processor::updateModel(std::string newModelPath){
     setLatencySamples(new_latency);
     dry_wet_mixer.setWetLatency((float) new_latency);
     inference_handler->set_inference_backend(anira::InferenceBackend::CUSTOM);
+
+    for (size_t i = 0; i < 8; ++i) {
+        juce::String scaleID = "latentVariable" + juce::String(i + 1);
+        juce::String biasID = "latentVariable" + juce::String(i + 1) + "Bias";
+        custom_backend->setLatentScalePublic(i, *apvts.getRawParameterValue(scaleID));
+        custom_backend->setLatentBiasPublic(i, *apvts.getRawParameterValue(biasID));
+    }
 
     juce::AudioProcessor::suspendProcessing(false);
 }

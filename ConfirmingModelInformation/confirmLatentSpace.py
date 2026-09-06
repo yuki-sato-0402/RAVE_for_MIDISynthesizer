@@ -1,6 +1,6 @@
 import torch
 
-model = torch.jit.load("models/altoSaxV1_e02d7ebfe3_streaming_norm.ts", map_location="cpu")
+model = torch.jit.load("InitialModel/altoSaxV1_e02d7ebfe3_streaming_norm.ts", map_location="cpu")
 model.eval()
 
 # RAVE's standard input format (batch, channels, length)
@@ -11,6 +11,7 @@ with torch.no_grad():
         # RAVE typically has encode and decode methods.
         if hasattr(model, 'encode'):
             latent = model.encode(dummy_input)
+            #([1, 8, 1])
             print(f"Latent shape: {latent.shape}")
             print(f"Latent dimensions: {latent.shape[-2]}")  
         else:

@@ -6,7 +6,7 @@
 #include "CustomBackendProcessor.h"
 //==============================================================================
 class RAVE_for_MIDISynthesizer_Processor  : public juce::AudioProcessor, public juce::AudioProcessorValueTreeState::Listener, 
-public juce::ValueTree::Listener, public juce::ActionBroadcaster
+public juce::ValueTree::Listener
 {
 public:
     //==============================================================================
@@ -76,20 +76,37 @@ private:
 
     juce::dsp::DryWetMixer<float> dry_wet_mixer;
 
-    //lamda type oscillator
-    juce::dsp::Oscillator<float> osc { [](float x) { return std::sin (x); } };
+    static constexpr size_t maxNumVoices = 4;
+
+    struct Voice {
+        int noteNumber = -1;        // Currently assigned MIDI note number (-1 indicates unassigned)
+        bool active = false;        // Whether the voice is currently playing
+        uint64_t noteOnCounter = 0; // Timestamp of when the note was turned on (used for voice stealing)
+
+        juce::dsp::Oscillator<float> sinOsc { [](float x) { return std::sin (x); } };                // Sine wave oscillator
+        juce::dsp::Oscillator<float> squareOsc { [](float x) { return x < 0.0f ? -1.0f : 1.0f; } }; // Square wave oscillator
+        juce::ADSR adsr;                                                                              // Voice-independent ADSR envelope generator
+
+        // Sample rate and ADSR parameter initialization
+        void prepare(const juce::dsp::ProcessSpec& spec, double sampleRate, const juce::ADSR::Parameters& params)
+        {
+            sinOsc.prepare(spec);
+            squareOsc.prepare(spec);
+            adsr.setSampleRate(sampleRate);
+            adsr.setParameters(params);
+        }
+    };
+
+    std::array<Voice, maxNumVoices> voices; 
+    uint64_t globalNoteCounter = 0;         // Globally count up the note on identifier counter
+
     juce::dsp::Gain<float> gain;
-    
-    juce::ADSR adsr;
     juce::ADSR::Parameters adsrParams;
 
-    float dryWetRangeParam;
-    float gainParam;
-    int modelIndex;
-
-    //midi control
-    int lastNoteNumber = -1;
-    bool noteActive = false;
+    float dryWetRangeParam = 0.0f;
+    float oscMixParam = 0.0f;
+    float gainParam = 0.5f;
+    int modelIndex = 0;
 
     float latentVariable1ScaleParam = 0.0f;
     float latentVariable2ScaleParam = 0.0f;

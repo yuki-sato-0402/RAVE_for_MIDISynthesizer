@@ -28,6 +28,22 @@ RAVE_for_MIDISynthesizer_ProcessorEditor::RAVE_for_MIDISynthesizer_ProcessorEdit
   MixLabel.setColour(juce::Label::textColourId, juce::Colours::black);
   addAndMakeVisible(MixLabel);
 
+  OscMixSliderAttachment.reset (new SliderAttachment (valueTreeState, "oscMix", OscMixSlider));
+  OscMixSlider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
+  OscMixSlider.setTextValueSuffix (" %");     
+  OscMixSlider.setTextBoxStyle (juce::Slider::TextBoxBelow, false, OscMixSlider.getTextBoxWidth(), OscMixSlider.getTextBoxHeight());
+  addAndMakeVisible(OscMixSlider);
+  OscMixSlider.setColour(juce::Slider::rotarySliderOutlineColourId, juce::Colours::white);
+  OscMixSlider.setColour(juce::Slider::rotarySliderFillColourId, juce::Colours::greenyellow.darker(0.25).withAlpha(0.75f));
+  OscMixSlider.setColour(juce::Slider::thumbColourId , juce::Colours::greenyellow.darker(0.1f));
+  OscMixSlider.setColour(juce::Slider::textBoxTextColourId, juce::Colours::black);
+  OscMixSlider.setColour(juce::Slider::textBoxOutlineColourId , juce::Colours::greenyellow.darker(0.25));
+
+  OscMixLabel.setText ("oscMix", juce::dontSendNotification);
+  OscMixLabel.setJustificationType(juce::Justification::centred);
+  OscMixLabel.setColour(juce::Label::textColourId, juce::Colours::black);
+  addAndMakeVisible(OscMixLabel);
+
   GainSliderAttachment.reset (new SliderAttachment (valueTreeState, "outputGain", GainSlider));
   GainSlider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
   GainSlider.setTextBoxStyle (juce::Slider::TextBoxBelow, false, GainSlider.getTextBoxWidth(), GainSlider.getTextBoxHeight());
@@ -364,7 +380,6 @@ RAVE_for_MIDISynthesizer_ProcessorEditor::RAVE_for_MIDISynthesizer_ProcessorEdit
   latentVariable8BiasSlider.setColour(juce::Slider::textBoxOutlineColourId , juce::Colours::greenyellow.darker(0.25));
 
   startTimer(100); 
-  processorRef.addActionListener(this);
 
   addAndMakeVisible(midiKeyboardComponent);
   midiKeyboardState.addListener(&processorRef.getMidiMessageCollector());
@@ -382,15 +397,17 @@ void RAVE_for_MIDISynthesizer_ProcessorEditor::resized()
 {
 
   auto area = getLocalBounds();
-  auto componentWidth1 = (area.getWidth() / 2 - 80 ) / 3; 
+  auto padding1 = 20; 
+  auto padding2 = 10;         
+  auto leftTopWidth = area.getWidth() / 2 - 40;
+  auto componentWidth1 = (leftTopWidth - (padding1 * 3)) / 4; 
   auto componentWidth2 = (area.getWidth() / 2  - 100 ) / 4;
   auto componentHeight1 = (area.getHeight()-  100)/ 10 ;
   auto componentHeight2 = (area.getHeight()-  200 - (componentHeight1 * 3)) / 9 ;
-  auto padding1 = 20; 
-  auto padding2 = 10;         
 
   MixSlider.setBounds(padding1,  padding1 + 15, componentWidth1 ,  componentHeight1 * 3 - 15);
-  GainSlider.setBounds(MixSlider.getRight() + padding1, padding1 + 15, componentWidth1 , componentHeight1 * 3 - 15);
+  OscMixSlider.setBounds(MixSlider.getRight() + padding1, padding1 + 15, componentWidth1 , componentHeight1 * 3 - 15);
+  GainSlider.setBounds(OscMixSlider.getRight() + padding1, padding1 + 15, componentWidth1 , componentHeight1 * 3 - 15);
   openFileButton.setBounds(GainSlider.getRight() + padding1, padding1 + 15, componentWidth1 , (componentHeight1 * 3 - 15) / 2);
 
   int graphHeight = 60;
@@ -470,6 +487,7 @@ void RAVE_for_MIDISynthesizer_ProcessorEditor::resized()
   midiKeyboardComponent.setBounds(padding1, AttackSlider.getBottom() + padding1, area.getWidth() - 40, componentHeight1* 3);
 
   MixLabel.setBounds(MixSlider.getX(), MixSlider.getY() - 15, MixSlider.getWidth(),MixSlider.getTextBoxHeight() );
+  OscMixLabel.setBounds(OscMixSlider.getX(), OscMixSlider.getY() - 15, OscMixSlider.getWidth(),OscMixSlider.getTextBoxHeight() );
   GainLabel.setBounds(GainSlider.getX(), GainSlider.getY() - 15, GainSlider.getWidth(),GainSlider.getTextBoxHeight() );
   AttackLabel.setBounds(AttackSlider.getX(), AttackSlider.getY() - 15, AttackSlider.getWidth(),AttackSlider.getTextBoxHeight());
   DecayLabel.setBounds(DecaySlider.getX(), DecaySlider.getY() - 15, DecaySlider.getWidth(), DecaySlider.getTextBoxHeight());
@@ -527,11 +545,6 @@ void RAVE_for_MIDISynthesizer_ProcessorEditor::timerCallback()
   latentVariable6Meter.setValue(processorRef.getLatentVariables(5));
   latentVariable7Meter.setValue(processorRef.getLatentVariables(6));
   latentVariable8Meter.setValue(processorRef.getLatentVariables(7));
-}
-
-void RAVE_for_MIDISynthesizer_ProcessorEditor::actionListenerCallback(const juce::String& message)
-{
-  juce::ignoreUnused(message);
 }
 
 void RAVE_for_MIDISynthesizer_ProcessorEditor::openFileButtonClicked()

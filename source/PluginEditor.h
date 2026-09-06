@@ -14,7 +14,7 @@
   ==============================================================================
 */
 
-class RAVE_for_MIDISynthesizer_ProcessorEditor  : public juce::AudioProcessorEditor, public juce::Slider::Listener, private juce::Timer, public juce::ActionListener
+class RAVE_for_MIDISynthesizer_ProcessorEditor  : public juce::AudioProcessorEditor, public juce::Slider::Listener, private juce::Timer
 {
 public:
   RAVE_for_MIDISynthesizer_ProcessorEditor(RAVE_for_MIDISynthesizer_Processor& p, juce::AudioProcessorValueTreeState& apvts);
@@ -26,7 +26,6 @@ public:
   void sliderValueChanged(juce::Slider* slider) override;
   void ADSRGraph(juce::Graphics& g);
   void timerCallback() override;
-  void actionListenerCallback(const juce::String& message) override;
   void openFileButtonClicked();
   typedef juce::AudioProcessorValueTreeState::SliderAttachment SliderAttachment;
   typedef juce::AudioProcessorValueTreeState::ComboBoxAttachment ComboBoxAttachment;
@@ -37,6 +36,7 @@ private:
   RAVE_for_MIDISynthesizer_Processor& processorRef;
   juce::AudioProcessorValueTreeState& valueTreeState;
   juce::Slider MixSlider;
+  juce::Slider OscMixSlider;
   juce::Slider GainSlider;
   juce::Slider  AttackSlider;
   juce::Slider  DecaySlider;
@@ -54,6 +54,7 @@ private:
   juce::TextButton openFileButton{ "Open Model File" };
   
   juce::Label  MixLabel;
+  juce::Label  OscMixLabel;
   juce::Label  GainLabel;
   juce::Label  AttackLabel;
   juce::Label  DecayLabel;
@@ -82,6 +83,7 @@ private:
   juce::Slider latentVariable8BiasSlider;
 
   std::unique_ptr<SliderAttachment> MixSliderAttachment;
+  std::unique_ptr<SliderAttachment> OscMixSliderAttachment;
   std::unique_ptr<SliderAttachment> GainSliderAttachment;
   std::unique_ptr<SliderAttachment> AttackSliderAttachment;
   std::unique_ptr<SliderAttachment> DecaySliderAttachment;

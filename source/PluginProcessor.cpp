@@ -11,6 +11,8 @@ RAVE_for_MIDISynthesizer_Processor::RAVE_for_MIDISynthesizer_Processor()
         juce::AudioProcessorValueTreeState::ParameterLayout {
         std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "dryWetRange",  1}, "DryWetRange",
         juce::NormalisableRange<float>(0.f, 100.f, 0.01f), 0.f),
+        std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "oscMix",  1}, "OscMix",
+        juce::NormalisableRange<float>(0.f, 100.f, 0.01f), 0.f),
         std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "outputGain",  1}, "OutputGain",
         juce::NormalisableRange<float>(0.f, 1.f, 0.01f), 0.5f),
         std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "attackTime",  1}, "AttackTime",
@@ -66,6 +68,7 @@ RAVE_for_MIDISynthesizer_Processor::RAVE_for_MIDISynthesizer_Processor()
     inference_handler = std::make_unique<anira::InferenceHandler>(*pp_processor, *inference_config, *custom_backend);
 
     apvts.addParameterListener("dryWetRange", this);
+    apvts.addParameterListener("oscMix", this);
     apvts.addParameterListener("outputGain", this);
     apvts.state.addListener(this);// for filechooser lastFilePath
     apvts.addParameterListener("attackTime", this);
@@ -90,6 +93,7 @@ RAVE_for_MIDISynthesizer_Processor::RAVE_for_MIDISynthesizer_Processor()
     apvts.addParameterListener("latentVariable8Bias", this);
 
     dryWetRangeParam = *apvts.getRawParameterValue("dryWetRange");
+    oscMixParam = *apvts.getRawParameterValue("oscMix");
     gainParam = *apvts.getRawParameterValue("outputGain");
     //modelIndex = static_cast<int>(*apvts.getRawParameterValue("modelSelection"));
     //std::cout << "Initial modelIndex: " << modelIndex.size << std::endl;
@@ -219,20 +223,23 @@ void RAVE_for_MIDISynthesizer_Processor::prepareToPlay (double sampleRate, int s
     
     int new_latency = (int) inference_handler->get_latency();
 
-    osc.prepare(spec);
-    osc.setFrequency(440.0f);
+    juce::dsp::ProcessSpec monoSpec {sampleRate,
+                                     static_cast<juce::uint32>(samplesPerBlock),
+                                     1};
+    for (auto& v : voices)
+    {
+        v.prepare(monoSpec, sampleRate, adsrParams);
+    }
+    globalNoteCounter = 0;
+
     gain.prepare(spec);
     gain.setGainLinear(gainParam);
 
-   
     setLatencySamples(new_latency);
     dry_wet_mixer.setWetLatency((float) new_latency);
     dry_wet_mixer.setWetMixProportion(dryWetRangeParam / 100.0f);
 
     midiMessageCollector.reset(sampleRate);
-    adsr.setSampleRate(sampleRate);
-    adsr.setParameters(adsrParams);
-
 
     std::cout << "$Using CUSTOM backend for inference.$" << std::endl;
     inference_handler->set_inference_backend(anira::InferenceBackend::CUSTOM);
@@ -269,28 +276,131 @@ void RAVE_for_MIDISynthesizer_Processor::processBlock (juce::AudioBuffer<float>&
         if (msg.isNoteOn())
         {
             int noteNumber = msg.getNoteNumber();
-            lastNoteNumber = noteNumber;
-            double freq = juce::MidiMessage::getMidiNoteInHertz(noteNumber);
-            osc.setFrequency(static_cast<float>(freq));
-            adsr.noteOn();
-            noteActive = true;
+            globalNoteCounter++; // Update the timestamp with every new Note On event.
+
+            Voice* targetVoice = nullptr; // Pointer to the voice that will be used for this note event.
+
+            // [Step 1] If there is already a voice playing the same note number, reuse it (retrigger).
+            for (auto& v : voices)
+            {
+                if (v.active && v.noteNumber == noteNumber)
+                {
+                    targetVoice = &v; // Reuse the existing voice for retriggering
+                    break;
+                }
+            }
+
+            // [Step 2] Search for an unused (available) voice.
+            if (targetVoice == nullptr)
+            {
+                for (auto& v : voices)
+                {
+                    if (!v.active)
+                    {
+                        targetVoice = &v; // Found an available voice
+                        break;
+                    }
+                }
+            }
+
+            // [Step 3] If all 4 voices are occupied, steal the oldest one (Voice Stealing)
+            if (targetVoice == nullptr)
+            {
+                uint64_t oldestTime = std::numeric_limits<uint64_t>::max();
+                for (auto& v : voices)
+                {
+                    if (v.noteOnCounter < oldestTime)
+                    {
+                        oldestTime = v.noteOnCounter;
+                        targetVoice = &v; // Steal the oldest voice
+                    }
+                }
+            }
+
+            // Set the note information and frequency for the selected voice and start the ADSR.
+            if (targetVoice != nullptr)
+            {
+                targetVoice->noteNumber = noteNumber;
+                targetVoice->active = true;
+                targetVoice->noteOnCounter = globalNoteCounter;
+
+                double freq = juce::MidiMessage::getMidiNoteInHertz(noteNumber);
+                targetVoice->sinOsc.setFrequency(static_cast<float>(freq));
+                targetVoice->squareOsc.setFrequency(static_cast<float>(freq));
+
+                targetVoice->adsr.noteOn();
+            }
         }
         else if (msg.isNoteOff())
         {
             int noteNumber = msg.getNoteNumber();
-            if (noteActive && noteNumber == lastNoteNumber)
+            // Transition the ADSR of the voice matching the released note number to the release state (Note Off).
+            for (auto& v : voices)
             {
-                noteActive = false;
-                adsr.noteOff();
+                if (v.active && v.noteNumber == noteNumber)
+                {
+                    v.adsr.noteOff();
+                }
             }
         }
     }
 
+    // Audio synthesis and rendering
+    buffer.clear(); 
 
-    juce::dsp::AudioBlock<float> audioBlock(buffer);
-    //juce::dsp::ProcessContextReplacing rewrites the buffer itself.
-    osc.process(juce::dsp::ProcessContextReplacing<float>(audioBlock));
-    adsr.applyEnvelopeToBuffer(buffer, 0, buffer.getNumSamples());
+    // Calculate the mix ratio of sine wave to square wave (oscMixParam: 0.0f = 100% sine, 100.0f = 100% square)
+    float sinRatio = 1.0f - (oscMixParam / 100.0f);
+    float squareRatio = oscMixParam / 100.0f;
+
+    int numSamples = buffer.getNumSamples();
+    juce::AudioBuffer<float> voiceBuffer(1, numSamples);  // Voice-specific mixed audio work buffer
+    juce::AudioBuffer<float> sinBuffer(1, numSamples);    // Sine wave dedicated buffer
+    juce::AudioBuffer<float> squareBuffer(1, numSamples); // Square wave dedicated buffer
+
+    // Generate waveforms for each voice, apply envelopes, and add to the main buffer
+    for (auto& v : voices)
+    {
+        // Voice is active or has a pending release envelope
+        if (v.active || v.adsr.isActive())
+        {
+            voiceBuffer.clear();
+            sinBuffer.clear();
+            squareBuffer.clear();
+
+            juce::dsp::AudioBlock<float> sinBlock(sinBuffer);
+            juce::dsp::AudioBlock<float> squareBlock(squareBuffer);
+
+            // Generate sine and square waves independently
+            v.sinOsc.process(juce::dsp::ProcessContextReplacing<float>(sinBlock));
+            v.squareOsc.process(juce::dsp::ProcessContextReplacing<float>(squareBlock));
+
+            auto* vWrite = voiceBuffer.getWritePointer(0);
+            const auto* sRead = sinBuffer.getReadPointer(0);
+            const auto* sqRead = squareBuffer.getReadPointer(0);
+
+            // Blend two types of waveforms at a specified ratio on a sample-by-sample basis.
+            for (int i = 0; i < numSamples; ++i)
+            {
+                vWrite[i] = (sRead[i] * sinRatio + sqRead[i] * squareRatio) * 0.5f;
+            }
+
+            // Apply voice-specific ADSR envelope
+            v.adsr.applyEnvelopeToBuffer(voiceBuffer, 0, numSamples);
+
+            // Add the voice's audio to the main output buffer (polyphonic synthesis)
+            for (int ch = 0; ch < buffer.getNumChannels(); ++ch)
+            {
+                buffer.addFrom(ch, 0, voiceBuffer, 0, 0, numSamples);
+            }
+
+            // Completely deactivate the voice once the ADSR release phase has finished.
+            if (!v.adsr.isActive())
+            {
+                v.active = false;
+                v.noteNumber = -1;
+            }
+        }
+    }
 
     dry_wet_mixer.pushDrySamples(buffer);
 
@@ -298,6 +408,7 @@ void RAVE_for_MIDISynthesizer_Processor::processBlock (juce::AudioBuffer<float>&
     
     dry_wet_mixer.mixWetSamples(buffer);
 
+    juce::dsp::AudioBlock<float> audioBlock(buffer);
     gain.process(juce::dsp::ProcessContextReplacing<float>(audioBlock));
 
     if (isNonRealtime()) {
@@ -305,7 +416,6 @@ void RAVE_for_MIDISynthesizer_Processor::processBlock (juce::AudioBuffer<float>&
     }
 
     //Cut the sound during warm-up inference
-    int numSamples = buffer.getNumSamples();
     if (totalSamplesProcessed < static_cast<int64_t>(mutedSamples))
     {
         int64_t remainingSamples = std::min(static_cast<int64_t>(numSamples), static_cast<int64_t>(mutedSamples) - totalSamplesProcessed);
@@ -349,6 +459,10 @@ void RAVE_for_MIDISynthesizer_Processor::parameterChanged(const juce::String &pa
         dryWetRangeParam = newValue;
         dry_wet_mixer.setWetMixProportion(dryWetRangeParam / 100.0f);
         std::cout << "DryWetRange changed to: " << dryWetRangeParam << std::endl;
+    }else if (parameterID == "oscMix") 
+    {
+        oscMixParam = newValue;
+        std::cout << "oscMix changed to: " << oscMixParam << std::endl;
     }else if (parameterID == "outputGain") 
     {
         gainParam = newValue;
@@ -357,22 +471,22 @@ void RAVE_for_MIDISynthesizer_Processor::parameterChanged(const juce::String &pa
     }else if (parameterID == "attackTime") 
     {
         adsrParams.attack = newValue / 1000.0f;
-        adsr.setParameters(adsrParams);
+        for (auto& v : voices) v.adsr.setParameters(adsrParams);
         std::cout << "AttackTime changed to: " << newValue << " ms" << std::endl;
     }else if (parameterID == "decayTime") 
     {
         adsrParams.decay = newValue / 1000.0f;
-        adsr.setParameters(adsrParams);
+        for (auto& v : voices) v.adsr.setParameters(adsrParams);
         std::cout << "DecayTime changed to: " << newValue << " ms" << std::endl;
     }else if (parameterID == "sustain") 
     {
         adsrParams.sustain = newValue / 100.0f; 
-        adsr.setParameters(adsrParams);
+        for (auto& v : voices) v.adsr.setParameters(adsrParams);
         std::cout << "Sustain changed to: " << newValue << std::endl;
     }else if (parameterID == "releaseTime") 
     {
         adsrParams.release = newValue / 1000.0f; 
-        adsr.setParameters(adsrParams);
+        for (auto& v : voices) v.adsr.setParameters(adsrParams);
         std::cout << "ReleaseTime changed to: " << newValue << " ms" << std::endl;
     }else if (parameterID == "latentVariable1") 
     {

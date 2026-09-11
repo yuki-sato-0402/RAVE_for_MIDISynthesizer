@@ -1,6 +1,6 @@
 import torch
 
-model = torch.jit.load("InitialModel/altoSaxV1_e02d7ebfe3_streaming_norm.ts", map_location="cpu")
+model = torch.jit.load("InitialModel/DistortedGTV1_e02d7ebfe3_streaming.ts", map_location="cpu")
 model.eval()
 
 # RAVE's standard input format (batch, channels, length)

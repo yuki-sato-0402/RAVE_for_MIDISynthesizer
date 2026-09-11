@@ -7,6 +7,7 @@ This project implements a neural-based MIDI synthesizer using the JUCE framework
 ## Key Features
 - **Multi-Format Support**: Build as a **VST3 or AU plugin** for use in DAWs, or as a **Standalone** application.
 - **Neural Synthesis**: Real-time audio generation using pre-trained RAVE models (v1 architecture).
+- **Dynamic Model Selection**: Easily load and switch custom RAVE TorchScript (`.ts`) models at runtime by clicking the **"Open Model File"** button.
 - **Polyphonic Playback**: Up to 4-voice polyphony for rich harmonic playing.
 - **Oscillator Waveform Mixer (Sine + Square)**: Dynamically blend Sine and Square wave oscillators to control the harmonic content of the excitation signal. By sculpting the input overtones, you can unlock and explore a wider variety of rich acoustic features contained within the RAVE model.
 - **UI Latent Variable Control**: Independently control the Scale Factor and Bias of 8 latent dimensions via intuitive UI sliders.
@@ -27,6 +28,8 @@ cmake --build .
 In creating this project, I trained three types of RAVE models (water sounds, violin, and alto saxophone).   
 You can download the models [here](https://www.dropbox.com/scl/fo/454ud8t5eulpj42d0ztmg/AB4ozeBlznhIaZ2UwxocFqg?rlkey=15en2vvl7gwtlahsg7lgmdnq5&st=g60m3rzv&dl=0).  
 
+By clicking the **"Open Model File"** button in the UI, a file selection dialog will open, allowing you to load and switch to any desired model (`.ts` file) at any time.
+
 All three models were trained using the v1 architecture. While it may also depend on the machine's performance, the v2 architecture model frequently experienced audio dropouts and was quite unstable.
 
 In Anira, the [InferenceConfig class](https://anira-project.github.io/anira/usage.html#inferenceconfig) allows you to specify the maximum inference time during initialization, making this adjustment particularly important.
@@ -35,6 +38,10 @@ In Anira, the [InferenceConfig class](https://anira-project.github.io/anira/usag
 When training with the v1 architecture, the default number of dimensions for latent variables is 128. Since it would be difficult to control these individually, this application compresses the model to 8 dimensions before use. The number 8 is based on the original [RAVE VST](https://forum.ircam.fr/projects/detail/rave-vst/).  
 
 The dimension of latent variables can be specified when exporting the model's checkpoint file as a torchscript (.ts). Please refer to [this](https://github.com/victor-shepardson/RAVE/blob/vs-ups/scripts/export.py) program.  
+For example, you can export a model with an 8-dimensional latent space using the following command:
+```bash
+python scripts/export.py --run /path/to/checkpoint --output models --latent_size 8 --streaming
+```
 
 To check the number of dimensions in the model, please refer to [this](https://github.com/yuki-sato-0402/RAVE_for_MIDISynthesizer/blob/main/ConfirmingModelInformation/confirmLatentSpace.py) program. To check the minimum and maximum values of the latent variables, please refer to [this](https://github.com/yuki-sato-0402/RAVE_for_MIDISynthesizer/blob/main/ConfirmingModelInformation/confirmRangeRangeOfLatentVariables.py) program.
 

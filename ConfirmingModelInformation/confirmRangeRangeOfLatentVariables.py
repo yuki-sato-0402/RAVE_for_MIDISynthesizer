@@ -1,7 +1,7 @@
 import torch
 import torchaudio
 
-model = torch.jit.load("models/altoSaxV1_e02d7ebfe3_streaming_norm.ts", map_location="cpu")
+model = torch.jit.load("InitialModel/altoSaxV1_e02d7ebfe3_streaming_norm.ts", map_location="cpu")
 model.eval()
 
 waveform, sr = torchaudio.load("ConfirmingModelInformation/sine.wav")

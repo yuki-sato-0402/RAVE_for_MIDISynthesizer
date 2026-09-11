@@ -2,24 +2,17 @@
 
 **A real-time MIDI Synthesizer plugin (VST3 / AU / Standalone) powered by the [RAVE](https://github.com/acids-ircam/RAVE) model and the [anira](https://github.com/anira-project/anira/tree/main) library.**
 
-This project implements a neural-based MIDI synthesizer using the JUCE framework. Unlike standard RAVE implementations that require audio input, this application generates a sine wave internally based on MIDI input and uses it as the excitation signal for the RAVE model.
+This project implements a neural-based MIDI synthesizer using the JUCE framework. Unlike standard RAVE implementations that require audio input, this application generates internal oscillator signals (Sine and Square waves) driven by polyphonic MIDI input as the excitation signal for the RAVE model.
 
 ## Key Features
 - **Multi-Format Support**: Build as a **VST3 or AU plugin** for use in DAWs, or as a **Standalone** application.
 - **Neural Synthesis**: Real-time audio generation using pre-trained RAVE models (v1 architecture).
-- **Latent MIDI Control**: Dynamically control the bias of 8 latent variables directly via MIDI note distance.
+- **Polyphonic Playback**: Up to 4-voice polyphony for rich harmonic playing.
+- **Oscillator Waveform Mixer (Sine + Square)**: Dynamically blend Sine and Square wave oscillators to control the harmonic content of the excitation signal. By sculpting the input overtones, you can unlock and explore a wider variety of rich acoustic features contained within the RAVE model.
+- **UI Latent Variable Control**: Independently control the Scale Factor and Bias of 8 latent dimensions via intuitive UI sliders.
 
 ## Demonstration
-[Youtube<img width="968" height="594" alt="Screenshot 2026-01-19 at 0 26 53" src="https://github.com/user-attachments/assets/970bc822-9339-4915-863a-82c8aad51d12" />](https://youtu.be/ORYQNKNNJjU?si=6QDs7ne-mZo-zgeL) 
-
-## Keyboard Operation Guide
-Using a MIDI keyboard, you can sequentially control the frequency of the sine wave input to the RAVE model and the bias of eight latent variables. The first key pressed controls the frequency of the sine wave (hereafter referred to as the root note). Subsequent keys control the bias, but only function while the root note is held down. In other words, releasing the root note once starts the step where the root note is pressed again.
-
-The bias amount can be controlled by the distance from the root note. Positions below the root are negative, and positions above the root are positive. A bias of 2.5 can be applied up to one octave away from the root. (This is like applying a 2.5/12 bias for every 12 semitones in an octave.)
-
-The bias is controlled by releasing a note once and then controlling the next latent variable. After all eight latent variables have been specified, the system returns to the first.
-
-In addition to the bias, you can also use the dial to scale (multiply) the latent variable from -1 to 1. Regarding scaling, I’m also considering whether it can be controlled using a physical controller such as a MIDI keyboard.
+[Youtube<img width="968" height="594" alt="Screenshot 2026-01-19 at 0 26 53" src="https://github.com/user-attachments/assets/970bc822-9339-4915-863a-82c8aad51d12" />](https://youtu.be/ORYQNKNKJjU?si=6QDs7ne-mZo-zgeL) 
 
 ## 🛠️ Build Instructions
 ```

@@ -19,7 +19,7 @@ static std::vector<anira::ModelData> getModelData()
     fs::path dir = fs::temp_directory_path() / "RaveForMIDISynthesizer_models";
     std::error_code ec;
     fs::create_directories(dir, ec);
-    fs::path modelPath = dir / "InitialModel/DistortedGTV1_e02d7ebfe3_streaming_norm.ts";
+    fs::path modelPath = dir / "DistortedGTV1_e02d7ebfe3_streaming_norm.ts";
 
     if (!fs::exists(modelPath))
     {

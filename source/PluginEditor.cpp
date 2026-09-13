@@ -39,7 +39,7 @@ RAVE_for_MIDISynthesizer_ProcessorEditor::RAVE_for_MIDISynthesizer_ProcessorEdit
   OscMixSlider.setColour(juce::Slider::textBoxTextColourId, juce::Colours::black);
   OscMixSlider.setColour(juce::Slider::textBoxOutlineColourId , juce::Colours::greenyellow.darker(0.25));
 
-  OscMixLabel.setText ("oscMix", juce::dontSendNotification);
+  OscMixLabel.setText (u8"oscMix\n sin→square", juce::dontSendNotification);
   OscMixLabel.setJustificationType(juce::Justification::centred);
   OscMixLabel.setColour(juce::Label::textColourId, juce::Colours::black);
   addAndMakeVisible(OscMixLabel);
@@ -487,7 +487,7 @@ void RAVE_for_MIDISynthesizer_ProcessorEditor::resized()
   midiKeyboardComponent.setBounds(padding1, AttackSlider.getBottom() + padding1, area.getWidth() - 40, componentHeight1* 3);
 
   MixLabel.setBounds(MixSlider.getX(), MixSlider.getY() - 15, MixSlider.getWidth(),MixSlider.getTextBoxHeight() );
-  OscMixLabel.setBounds(OscMixSlider.getX(), OscMixSlider.getY() - 15, OscMixSlider.getWidth(),OscMixSlider.getTextBoxHeight() );
+  OscMixLabel.setBounds(OscMixSlider.getX(), OscMixSlider.getY() - 27, OscMixSlider.getWidth(),OscMixSlider.getTextBoxHeight()* 2 );
   GainLabel.setBounds(GainSlider.getX(), GainSlider.getY() - 15, GainSlider.getWidth(),GainSlider.getTextBoxHeight() );
   AttackLabel.setBounds(AttackSlider.getX(), AttackSlider.getY() - 15, AttackSlider.getWidth(),AttackSlider.getTextBoxHeight());
   DecayLabel.setBounds(DecaySlider.getX(), DecaySlider.getY() - 15, DecaySlider.getWidth(), DecaySlider.getTextBoxHeight());

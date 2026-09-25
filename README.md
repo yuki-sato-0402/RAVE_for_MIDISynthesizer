@@ -13,7 +13,7 @@ This project implements a neural-based MIDI synthesizer using the JUCE framework
 - **UI Latent Variable Control**: Independently control the Scale Factor and Bias of 8 latent dimensions via intuitive UI sliders.
 
 ## Demonstration
-[Youtube<img width="968" height="594" alt="Screenshot 2026-01-19 at 0 26 53" src="https://github.com/user-attachments/assets/970bc822-9339-4915-863a-82c8aad51d12" />](https://youtu.be/ORYQNKNKJjU?si=6QDs7ne-mZo-zgeL) 
+[Youtube<img width="968" height="594" alt="Screenshot 2026-01-19 at 0 26 53" src="https://github.com/user-attachments/assets/970bc822-9339-4915-863a-82c8aad51d12" />](https://youtu.be/9vvHGECLLbk) 
 
 ## 🛠️ Build Instructions
 ```
